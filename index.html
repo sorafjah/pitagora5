@@ -33,6 +33,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 #timeRow{display:flex;gap:6px;align-items:center}
 #timeRow button{background:#e8eef2;font-size:14px;padding:0 10px;white-space:nowrap}
 #timeRow button.on{background:#7fd0ff}
+#rotBtn.on{background:#ffd54a!important}
 #clearBtn.warn{background:#ffb3a8}
 #timeLbl{font-size:14px;font-weight:700;white-space:nowrap}
 #time{flex:1;min-width:60px;height:44px;margin:0;accent-color:#e8590c}
@@ -53,6 +54,14 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 .pbtn{flex:none;width:86px;height:74px;background:#f1f5f8;box-shadow:0 2px 0 #0002;font-size:12px;line-height:1.2;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .pbtn svg{width:48px;height:34px;pointer-events:none}
 .pbtn:active{background:#d5e9f5}
+.pbtn{position:relative}
+.pbtn.new{background:#fff6cc}
+.pbtn.new::after{content:'NEW';position:absolute;top:2px;right:3px;background:#e8590c;color:#fff;font-size:10px;border-radius:6px;padding:1px 4px}
+#introList{list-style:none;padding:0;margin:8px 0}
+#introList li{display:flex;gap:12px;align-items:center;background:#f1f5f8;border-radius:12px;padding:6px 10px;margin-bottom:6px;font-size:17px;line-height:1.8}
+#introList li svg{flex:none;width:72px;height:51px;background:#fff;border-radius:8px}
+#introList li.goal{background:#fff3b0;font-weight:700}
+#introClose{display:block;margin:8px auto 0;background:#2e9e5b;color:#fff;font-size:20px;padding:0 36px;min-height:52px}
 #go{width:112px;background:#e8590c;color:#fff;font-size:20px;box-shadow:0 3px 0 #0003;line-height:1.3;flex:none}
 #go.stop{background:#555}
 #selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:170px;background:#fff;border-radius:14px;padding:6px 8px;box-shadow:0 3px 0 #0003;display:none;gap:6px;align-items:center;max-width:98vw}
@@ -61,7 +70,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 #selbar #delBtn{background:#ffd9d4}
 #selbar #optBtn{background:#d3f0dc}
 @media (max-width:900px){#cards{grid-template-columns:repeat(2,1fr)}#go{width:80px;font-size:16px}}
-@media (max-width:640px){#title{display:none}.lv{font-size:13px;padding:0 7px}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}}
+@media (max-width:640px){#title{display:none}#rotBtn,#slowBtn{font-size:12px!important;padding:0 6px!important}.lv{font-size:13px;padding:0 7px}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:12px;z-index:10}
 .modal.open{display:flex}
 .box{background:#fff;border-radius:18px;padding:14px 18px;max-width:640px;width:100%;max-height:94vh;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -84,11 +93,11 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 </script>
 </head>
 <body>
-<!-- build: 2026-11-13 -->
+<!-- build: 2026-11-13b -->
 <canvas id="c"></canvas>
 <div id="top">
   <div id="title">ピタゴラ５</div>
-  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button>
+  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button><button class="lv" data-lv="4"></button>
   <button id="helpBtn" aria-label="あそびかた">？</button>
 </div>
 <div id="mission"></div>
@@ -98,6 +107,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 <div id="panel">
   <div id="timeRow">
     <button id="slowBtn">🐢 ゆっくり</button>
+    <button id="rotBtn">🔄 してん</button>
     <span id="timeLbl">⏪ <ruby>時間<rt>じかん</rt></ruby></span>
     <input id="time" type="range" min="0" max="0" value="0" step="1" disabled>
     <button id="clearBtn"></button>
@@ -123,12 +133,18 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
     <li><span class="ic">🧩</span><ruby>下<rt>した</rt></ruby>の パーツを おすと、かべに <ruby>出<rt>で</rt></ruby>てくる</li>
     <li><span class="ic">👆</span>ゆびで うごかす。↺ ↻ で かたむける</li>
     <li><span class="ic">▶</span>「スタート」で <ruby>玉<rt>たま</rt></ruby>が ころがる。ゴールに <ruby>入<rt>はい</rt></ruby>れば せいこう！</li>
+    <li><span class="ic">🔄</span>「してん」ボタンを おすと、<ruby>画面<rt>がめん</rt></ruby>を なぞって <ruby>見<rt>み</rt></ruby>る <ruby>向<rt>む</rt></ruby>きを かえられる</li>
     <li><span class="ic">⏪</span><ruby>止<rt>と</rt></ruby>まったら「<ruby>時間<rt>じかん</rt></ruby>」の バーで まきもどして、たしかめよう</li>
-    <li><span class="ic">①</span>レベル1は れんしゅう。しかけを ボタンで えらぶだけ</li>
+    <li><span class="ic">①</span>レベル1は れんしゅう。レベル2〜4で パーツの つかい<ruby>方<rt>かた</rt></ruby>を おぼえよう</li>
   </ol>
   <button id="startBtn">はじめる</button>
 </div></div>
-<div id="ver">v2026-11-13</div>
+<div id="intro" class="modal"><div class="box">
+  <h2 id="introTitle"></h2>
+  <ul id="introList"></ul>
+  <button id="introClose">やってみる</button>
+</div></div>
+<div id="ver">v2026-11-13b</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -361,12 +377,25 @@ function createBuildSim(C, layout, eps){
 }
 // お題（lock＝動かせない部品） allow＝使えるパーツ
 const P=(type,x,y,rot,opt,lock)=>({type,x,y,rot:rot||0,opt:opt||0,lock:!!lock});
+// intro＝そのレベルで はじめて 出てくるパーツと、その説明（レベルに入ったときに表示）
 const BUILD_LEVELS = [
-  { tab:'2', mission:'いたを おいて、<ruby>玉<rt>たま</rt></ruby>を ゴールまで ころがそう', allow:['plankL','plankS'],
+  { tab:'2', mission:'いたを おいて、<ruby>玉<rt>たま</rt></ruby>を ゴールまで ころがそう', allow:['plankL','plankS','chime'],
+    intro:[ ['plankL','ながい いた・みじかい いた','<ruby>玉<rt>たま</rt></ruby>の とおりみちに なる。↺ ↻ で かたむけよう'],
+            ['chime','てっきん','<ruby>玉<rt>たま</rt></ruby>が あたると <ruby>音<rt>おと</rt></ruby>が なる。いたの かわりにも なるよ'] ],
     parts:[ P('plankS',3.5,14.5,-1,0,1), P('ball',3,15.5,0,0,1), P('goal',24,0.5,0,0,1) ] },
   { tab:'3', mission:'ばねや トランポリンで、<ruby>高<rt>たか</rt></ruby>い ゴールに とどけよう', allow:['plankL','plankS','spring','tramp'],
+    intro:[ ['spring','ばね','のった <ruby>玉<rt>たま</rt></ruby>を はじきとばす。↺ ↻ で とぶ <ruby>向<rt>む</rt></ruby>き、ボタンで つよさを かえる'],
+            ['tramp','トランポリン','<ruby>落<rt>お</rt></ruby>ちてきた <ruby>玉<rt>たま</rt></ruby>が はねかえる'] ],
     parts:[ P('plankS',3.5,5.5,-1,0,1), P('ball',3,6.5,0,0,1), P('plankS',15,6.5,0,0,1), P('goal',15,7,0,0,1) ] },
+  { tab:'4', mission:'<ruby>止<rt>と</rt></ruby>まっている <ruby>玉<rt>たま</rt></ruby>を、ふりこ や かざぐるまで うごかそう', allow:['plankL','plankS','pend','domino','spinner'],
+    intro:[ ['pend','ふりこ','スタートすると ふりおろして、ぶつかった ものを おす'],
+            ['domino','ドミノ','たおれると となりも たおれる。ならべて つなごう'],
+            ['spinner','かざぐるま','ずっと まわって、ふれた <ruby>玉<rt>たま</rt></ruby>を はじく'] ],
+    parts:[ P('plankL',6.5,12.5,0,0,1), P('ball',8,13.2,0,0,1), P('plankL',13.5,9.5,-1,0,1), P('plankL',19.5,6,-2,0,1),
+            P('plankS',26.5,3,6,0,1), P('goal',25.5,0.5,0,0,1) ] },
   { tab:'じゆう', free:true, mission:'すきな そうちを つくろう', allow:['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'],
+    intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が <ruby>落<rt>お</rt></ruby>ちると、はんたいがわが はねあがる'],
+            ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を ふやせる（3こまで）'] ],
     parts:[] }
 ];
 
@@ -392,7 +421,7 @@ const $ = id => document.getElementById(id);
 const clone = a => a.map(p=>Object.assign({},p));
 
 const state = { mode:'edit', level:0, choice:[0,0,0,0], sel:-1, paused:true, slow:false, camFar:false, focus:0,
-  frames:0, elapsed:0, status:'', failAt:0, viewT:0, cleared:[false,false,false,false] };
+  frames:0, elapsed:0, status:'', failAt:0, viewT:0, rotate:false, cleared:BUILD_LEVELS.map(()=>false).concat(false), introSeen:{} };
 const layouts = BUILD_LEVELS.map(l=>clone(l.free?SAMPLE:l.parts));
 const isTut = () => state.level===0;
 const BL = () => BUILD_LEVELS[state.level-1];
@@ -573,7 +602,7 @@ function finish(){ state.status=sim.status; state.failAt=sim.failAt; setMode('do
   const b=$('banner'), bb=$('bannerBtn'); b.style.display='flex'; b.className=sim.status;
   if(sim.status==='win'){ state.cleared[state.level]=true;
     if(BL()&&BL().free){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML='つづける'; bb.onclick=toEdit; }
-    else { $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML=state.level===2?'じゆうに つくる':'つぎの レベルへ'; bb.onclick=()=>setLevel(state.level+1); }
+    else { const nx=BUILD_LEVELS[state.level]; $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML=nx&&nx.free?'じゆうに つくる':'つぎの レベルへ'; bb.onclick=()=>setLevel(state.level+1); }
   } else if(isTut()){ const i=sim.failAt-1; state.focus=Math.min(i,3);
     $('bannerTxt').innerHTML=`ざんねん！ ${CIRC[i]} ${GADGETS[i].name} で うまく いかなかったよ`; bb.innerHTML='なおす'; bb.onclick=toEdit;
     const c=document.querySelectorAll('.card')[Math.min(i,3)]; if(c&&i<4) c.classList.add('bad');
@@ -582,7 +611,7 @@ function finish(){ state.status=sim.status; state.failAt=sim.failAt; setMode('do
 function setChoice(g,i){ state.choice[g]=i; state.focus=g; toEdit(); }
 function setLevel(l){ state.level=l; state.sel=-1; state.focus=0; state.camFar=!isTut(); cam.az=isTut()?VIEW.AZ_TUT:VIEW.AZ_BUILD; cam.el=isTut()?VIEW.EL_TUT:VIEW.EL_BUILD;
   $('cards').style.display=isTut()?'grid':'none'; $('palette').style.display=isTut()?'none':'flex';
-  if(!isTut()) buildPalette(); toEdit(); resize(); }
+  setRotate(false); if(!isTut()) buildPalette(); toEdit(); resize(); if(!isTut()&&!state.introSeen[l]){ state.introSeen[l]=true; showIntro(); } }
 function advance(dt){
   state.frames++; state.elapsed+=dt;
   if(state.mode==='run'&&!state.paused){
@@ -627,7 +656,7 @@ function resize(){ const w=window.innerWidth,h=window.innerHeight; renderer.setS
   freeTop=$('mission').getBoundingClientRect().bottom+4; freeBot=$('panel').offsetHeight;
   // 見たい所が、上のバーと下のパネルの間のまん中に来るように、画面全体をずらす
   camera.setViewOffset(w,h,0,(freeBot-freeTop)/2,w,h); camera.updateProjectionMatrix();
-  $('selbar').style.bottom=(freeBot+8)+'px'; }
+  $('selbar').style.bottom=(freeBot+8)+'px'; refreshUI(); }
 window.addEventListener('resize',resize);
 
 // ---------- UI ----------
@@ -650,19 +679,26 @@ const ICON={
   chime:'<rect x="6" y="14" width="26" height="7" rx="3" fill="#1c7ed6"/><text x="35" y="16" font-size="16" fill="#333">♪</text>'
 };
 function buildPalette(){ const el=$('palette'); el.innerHTML='';
-  BL().allow.forEach(t=>{ const b=document.createElement('button'); b.className='pbtn'; b.dataset.t=t;
+  const fresh=new Set(); BL().intro.forEach(r=>{ fresh.add(r[0]); if(r[0]==='plankL') fresh.add('plankS'); });
+  BL().allow.forEach(t=>{ const b=document.createElement('button'); b.className='pbtn'+(fresh.has(t)?' new':''); b.dataset.t=t;
     b.innerHTML=`<svg viewBox="0 0 48 34">${ICON[t]}</svg>${PARTS[t].name}`; b.addEventListener('click',()=>{ audioOn(); addPart(t); }); el.appendChild(b); }); }
+// レベルに入ったとき、あたらしいパーツの説明を出す（ページを開いている間、1回だけ）
+function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.free?'じゆうに つくろう':'レベル'+(state.level+1)+'　あたらしい パーツ';
+  $('introList').innerHTML=L.intro.map(r=>`<li><svg viewBox="0 0 48 34">${ICON[r[0]]}</svg><div><b>${r[1]}</b><br>${r[2]}</div></li>`).join('')+
+    (L.free?'':`<li class="goal"><div>🎯 ${L.mission}</div></li>`);
+  $('intro').classList.add('open'); }
+$('introClose').addEventListener('click',()=>{ audioOn(); $('intro').classList.remove('open'); });
 let toastT=0;
 function toast(msg){ const t=$('toast'); t.innerHTML=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',1600); }
 function refreshUI(){
   const tut=isTut();
   document.querySelectorAll('.opts button').forEach(b=>b.classList.toggle('on',state.choice[+b.dataset.g]===+b.dataset.i));
   document.querySelectorAll('.card').forEach((c,i)=>c.classList.toggle('sel',state.mode==='edit'&&!state.camFar&&state.focus===i));
-  document.querySelectorAll('.lv').forEach(b=>{ const l=+b.dataset.lv; b.classList.toggle('on',l===state.level); b.textContent=(state.cleared[l]?'⭐':'')+(l===3?'じゆう':'レベル'+(l+1)); });
-  $('slowBtn').classList.toggle('on',state.slow); $('camBtn').classList.toggle('on',tut?state.camFar:!state.camFar); $('camTxt').textContent=tut?'ぜんたい':'おいかける';
+  document.querySelectorAll('.lv').forEach(b=>{ const l=+b.dataset.lv; b.classList.toggle('on',l===state.level); const sm=window.innerWidth<520; b.textContent=(state.cleared[l]?'⭐':'')+(l===BUILD_LEVELS.length?'じゆう':(sm?'':'レベル')+(l+1)); });
+  $('slowBtn').classList.toggle('on',state.slow); $('rotBtn').classList.toggle('on',state.rotate); $('camBtn').classList.toggle('on',tut?state.camFar:!state.camFar); $('camTxt').textContent=tut?'ぜんたい':'おいかける';
   $('mission').innerHTML=tut?TUT_MISSION:BL().mission; $('mission').style.display=state.mode==='done'?'none':'block';
   const cb=$('clearBtn'); cb.style.display=tut?'none':''; if(!cb.classList.contains('warn')) cb.textContent=(BL()&&BL().free)?'🧹 ぜんぶ けす':'↩ さいしょから';
-  const sb=$('selbar'), p=!tut&&state.mode==='edit'&&state.sel>=0?layout()[state.sel]:null;
+  const sb=$('selbar'), p=!tut&&!state.rotate&&state.mode==='edit'&&state.sel>=0?layout()[state.sel]:null;
   sb.style.display=p?'flex':'none';
   if(p){ const sp=PARTS[p.type], canRot=!!(sp.rot||sp.lim); $('selName').textContent=sp.name;
     $('rotL').style.display=$('rotR').style.display=canRot?'':'none';
@@ -701,11 +737,12 @@ function pick(pt){ let best=-1,bd=1e9; const L=layout(), pad=0.5;
   return best; }
 let drag=null;
 canvas.addEventListener('pointerdown',e=>{ canvas.setPointerCapture(e.pointerId);
+  if(state.rotate){ drag={x:e.clientX,y:e.clientY,az:cam.az,el:cam.el}; return; }   // 「してん」ボタンが入っているときだけ、なぞって見る向きをかえる
   if(!isTut()&&state.mode==='edit'){ const pt=planePoint(e), i=pt?pick(pt):-1;
     if(i>=0){ const p=layout()[i]; if(p.lock){ toast('🔒 これは うごかせないよ'); return; }
       state.sel=i; drag={part:i,ox:p.x-pt.x,oy:p.y-pt.y}; changed(); return; }
     if(state.sel>=0){ state.sel=-1; changed(); } }
-  drag={x:e.clientX,y:e.clientY,az:cam.az,el:cam.el}; });
+  drag=null; });
 canvas.addEventListener('pointermove',e=>{ if(!drag) return;
   if(drag.part!==undefined){ const pt=planePoint(e); if(pt) movePart(drag.part,pt.x+drag.ox,pt.y+drag.oy); return; }
   cam.az=Math.max(-1.1,Math.min(1.1,drag.az-(e.clientX-drag.x)*0.006)); cam.el=Math.max(-0.05,Math.min(0.9,drag.el+(e.clientY-drag.y)*0.005)); });
@@ -713,7 +750,11 @@ canvas.addEventListener('pointermove',e=>{ if(!drag) return;
 
 $('go').addEventListener('click',()=>{ audioOn(); if(state.mode==='edit') start(); else toEdit(); });
 $('slowBtn').addEventListener('click',()=>{ state.slow=!state.slow; refreshUI(); });
-$('camBtn').addEventListener('click',()=>{ state.camFar=!state.camFar; cam.az=isTut()?VIEW.AZ_TUT:VIEW.AZ_BUILD; cam.el=isTut()?VIEW.EL_TUT:VIEW.EL_BUILD; refreshUI(); });
+$('camBtn').addEventListener('click',()=>{ state.camFar=!state.camFar; refreshUI(); });
+// 「してん」ボタン：入れると画面をなぞって見る向きをかえられる。切ると元の向きにもどる（その間はパーツを動かせない）
+function setRotate(on){ state.rotate=on; if(on){ state.sel=-1; } else { cam.az=isTut()?VIEW.AZ_TUT:VIEW.AZ_BUILD; cam.el=isTut()?VIEW.EL_TUT:VIEW.EL_BUILD; }
+  if(sim&&!isTut()&&state.mode==='edit') buildWorld(); refreshUI(); }
+$('rotBtn').addEventListener('click',()=>{ setRotate(!state.rotate); if(state.rotate) toast('ゆびで なぞると <ruby>見<rt>み</rt></ruby>る <ruby>向<rt>む</rt></ruby>きが かわるよ'); });
 $('rotL').addEventListener('click',()=>rotatePart(1)); $('rotR').addEventListener('click',()=>rotatePart(-1));
 $('optBtn').addEventListener('click',()=>{ audioOn(); cycleOpt(); }); $('delBtn').addEventListener('click',deletePart);
 let clearT=0;
@@ -737,7 +778,7 @@ window.__game={ state, camera, cam, CFG, PARTS, BOARD, BUILD_LEVELS, SAMPLE, lay
   api:{ tick(n,dt){ for(let i=0;i<(n||1);i++) advance(dt||1/60); renderer.render(scene,camera); return this.getState(); },
     getState(){ return {mode:state.mode,level:state.level,choice:state.choice.slice(),sel:state.sel,status:state.status,failAt:state.failAt,t:sim.t,frames:state.frames,parts:isTut()?0:layout().length,
       balls:sim.dyn.filter(d=>d.kind==='A'||d.kind==='B'||d.kind==='ball').map(d=>({x:d.body.position.x,y:d.body.position.y}))}; },
-    setChoice, setLevel, start(){ state.paused=false; $('help').classList.remove('open'); start(); }, reset(){ toEdit(); },
+    setChoice, setLevel, setRotate, closeIntro(){ $('intro').classList.remove('open'); }, start(){ state.paused=false; $('help').classList.remove('open'); start(); }, reset(){ toEdit(); },
     getLayout(){ return clone(layout()); }, setLayout(a){ layouts[state.level-1]=clone(a); state.sel=-1; toEdit(); },
     addPart, movePart, select(i){ state.sel=i; changed(); }, rotate:rotatePart, cycleOpt, deletePart, resetLayout,
     scrub(n){ $('time').value=n; },
