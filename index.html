@@ -93,11 +93,11 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 </script>
 </head>
 <body>
-<!-- build: 2026-11-13b -->
+<!-- build: 2026-11-13c -->
 <canvas id="c"></canvas>
 <div id="top">
   <div id="title">ピタゴラ５</div>
-  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button><button class="lv" data-lv="4"></button>
+  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button><button class="lv" data-lv="4"></button><button class="lv" data-lv="5"></button>
   <button id="helpBtn" aria-label="あそびかた">？</button>
 </div>
 <div id="mission"></div>
@@ -135,7 +135,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
     <li><span class="ic">▶</span>「スタート」で <ruby>玉<rt>たま</rt></ruby>が ころがる。ゴールに <ruby>入<rt>はい</rt></ruby>れば せいこう！</li>
     <li><span class="ic">🔄</span>「してん」ボタンを おすと、<ruby>画面<rt>がめん</rt></ruby>を なぞって <ruby>見<rt>み</rt></ruby>る <ruby>向<rt>む</rt></ruby>きを かえられる</li>
     <li><span class="ic">⏪</span><ruby>止<rt>と</rt></ruby>まったら「<ruby>時間<rt>じかん</rt></ruby>」の バーで まきもどして、たしかめよう</li>
-    <li><span class="ic">①</span>レベル1は れんしゅう。レベル2〜4で パーツの つかい<ruby>方<rt>かた</rt></ruby>を おぼえよう</li>
+    <li><span class="ic">①</span>レベル1は れんしゅう。レベル2〜5で パーツの つかい<ruby>方<rt>かた</rt></ruby>を おぼえよう</li>
   </ol>
   <button id="startBtn">はじめる</button>
 </div></div>
@@ -144,7 +144,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
   <ul id="introList"></ul>
   <button id="introClose">やってみる</button>
 </div></div>
-<div id="ver">v2026-11-13b</div>
+<div id="ver">v2026-11-13c</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -387,16 +387,19 @@ const BUILD_LEVELS = [
     intro:[ ['spring','ばね','のった <ruby>玉<rt>たま</rt></ruby>を はじきとばす。↺ ↻ で とぶ <ruby>向<rt>む</rt></ruby>き、ボタンで つよさを かえる'],
             ['tramp','トランポリン','<ruby>落<rt>お</rt></ruby>ちてきた <ruby>玉<rt>たま</rt></ruby>が はねかえる'] ],
     parts:[ P('plankS',3.5,5.5,-1,0,1), P('ball',3,6.5,0,0,1), P('plankS',15,6.5,0,0,1), P('goal',15,7,0,0,1) ] },
-  { tab:'4', mission:'<ruby>止<rt>と</rt></ruby>まっている <ruby>玉<rt>たま</rt></ruby>を、ふりこ や かざぐるまで うごかそう', allow:['plankL','plankS','pend','domino','spinner'],
+  { tab:'4', mission:'<ruby>止<rt>と</rt></ruby>まっている <ruby>玉<rt>たま</rt></ruby>を、ふりこ や かざぐるまで うごかそう', allow:['plankL','plankS','pend','spinner'],
     intro:[ ['pend','ふりこ','スタートすると ふりおろして、ぶつかった ものを おす'],
-            ['domino','ドミノ','たおれると となりも たおれる。ならべて つなごう'],
             ['spinner','かざぐるま','ずっと まわって、ふれた <ruby>玉<rt>たま</rt></ruby>を はじく'] ],
     parts:[ P('plankL',6.5,12.5,0,0,1), P('ball',8,13.2,0,0,1), P('plankL',13.5,9.5,-1,0,1), P('plankL',19.5,6,-2,0,1),
             P('plankS',26.5,3,6,0,1), P('goal',25.5,0.5,0,0,1) ] },
+  { tab:'5', mission:'<ruby>玉<rt>たま</rt></ruby>を おいて ころがし、だんの <ruby>上<rt>うえ</rt></ruby>の <ruby>玉<rt>たま</rt></ruby>を ゴールへ', allow:['ball','domino','seesaw','plankL','plankS'],
+    intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける（3こまで）'],
+            ['domino','ドミノ','たおれると となりも たおれる。ならべて つなごう'],
+            ['seesaw','シーソー','まん<ruby>中<rt>なか</rt></ruby>で ささえた いた。かたほうに のると かたむく'] ],
+    parts:[ P('plankL',4.5,14,-2,0,1), P('plankL',10.5,12.5,0,0,1), P('plankS',13.85,11.95,6,0,1), P('plankS',15,13.3,0,0,1),
+            P('ball',14.5,14,0,0,1), P('goal',18.5,0.5,0,0,1) ] },
   { tab:'じゆう', free:true, mission:'すきな そうちを つくろう', allow:['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'],
-    intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が <ruby>落<rt>お</rt></ruby>ちると、はんたいがわが はねあがる'],
-            ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を ふやせる（3こまで）'] ],
-    parts:[] }
+    intro:[], parts:[] }
 ];
 
 
@@ -684,8 +687,8 @@ function buildPalette(){ const el=$('palette'); el.innerHTML='';
     b.innerHTML=`<svg viewBox="0 0 48 34">${ICON[t]}</svg>${PARTS[t].name}`; b.addEventListener('click',()=>{ audioOn(); addPart(t); }); el.appendChild(b); }); }
 // レベルに入ったとき、あたらしいパーツの説明を出す（ページを開いている間、1回だけ）
 function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.free?'じゆうに つくろう':'レベル'+(state.level+1)+'　あたらしい パーツ';
-  $('introList').innerHTML=L.intro.map(r=>`<li><svg viewBox="0 0 48 34">${ICON[r[0]]}</svg><div><b>${r[1]}</b><br>${r[2]}</div></li>`).join('')+
-    (L.free?'':`<li class="goal"><div>🎯 ${L.mission}</div></li>`);
+  $('introList').innerHTML=L.free?`<li class="goal"><div>🧩 ぜんぶの パーツが つかえるよ。<br>まずは みほんを スタートしてみよう</div></li>`:
+    L.intro.map(r=>`<li><svg viewBox="0 0 48 34">${ICON[r[0]]}</svg><div><b>${r[1]}</b><br>${r[2]}</div></li>`).join('')+`<li class="goal"><div>🎯 ${L.mission}</div></li>`;
   $('intro').classList.add('open'); }
 $('introClose').addEventListener('click',()=>{ audioOn(); $('intro').classList.remove('open'); });
 let toastT=0;
