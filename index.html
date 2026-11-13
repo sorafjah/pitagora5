@@ -16,7 +16,7 @@ html,body{margin:0;height:100%;overflow:hidden;touch-action:manipulation;font-fa
 rt{font-size:.55em;font-weight:400}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width:44px;min-height:44px;cursor:pointer;color:#333}
-#top{position:fixed;top:8px;left:8px;right:8px;display:flex;gap:6px;align-items:center;pointer-events:none}
+#top{position:fixed;top:8px;left:8px;right:8px;display:flex;gap:6px;align-items:center;pointer-events:none;z-index:11}
 #top>*{pointer-events:auto}
 #title{font-size:22px;font-weight:700;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 2px 0 #0002;white-space:nowrap}
 .lv{background:#fff;font-size:15px;padding:0 10px;box-shadow:0 2px 0 #0002;white-space:nowrap}
@@ -72,7 +72,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 @media (max-width:1100px){.lv{font-size:13px;padding:0 7px}#title{font-size:18px}}
 @media (max-width:900px){#cards{grid-template-columns:repeat(2,1fr)}#go{width:80px;font-size:16px}}
 @media (max-width:640px){#title{display:none}#rotBtn,#slowBtn{font-size:12px!important;padding:0 6px!important}.lv{font-size:13px;padding:0 7px}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}}
-.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:12px;z-index:10}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:64px 12px 12px;z-index:10}
 .modal.open{display:flex}
 .box{background:#fff;border-radius:18px;padding:14px 18px;max-width:640px;width:100%;max-height:94vh;overflow:auto;-webkit-overflow-scrolling:touch}
 .box h2{margin:0 0 6px;font-size:22px;text-align:center}
@@ -94,7 +94,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 </script>
 </head>
 <body>
-<!-- build: 2026-11-13d -->
+<!-- build: 2026-11-13e -->
 <canvas id="c"></canvas>
 <div id="top">
   <div id="title">ピタゴラ５</div>
@@ -145,7 +145,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
   <ul id="introList"></ul>
   <button id="introClose">やってみる</button>
 </div></div>
-<div id="ver">v2026-11-13d</div>
+<div id="ver">v2026-11-13e</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -710,6 +710,7 @@ function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.free?'じゆう�
   $('introList').innerHTML=L.free?`<li class="goal"><div>🧩 ぜんぶの パーツが つかえるよ。<br>まずは みほんを スタートしてみよう</div></li>`:
     L.intro.map(r=>`<li><svg viewBox="0 0 48 34">${ICON[r[0]]}</svg><div><b>${r[1]}</b><br>${r[2]}</div></li>`).join('')+`<li class="goal"><div>🎯 ${L.mission}</div></li>`;
   $('intro').classList.add('open'); }
+$('intro').addEventListener('click',e=>{ if(e.target===$('intro')) $('intro').classList.remove('open'); });
 $('introClose').addEventListener('click',()=>{ audioOn(); $('intro').classList.remove('open'); });
 let toastT=0;
 function toast(msg){ const t=$('toast'); t.innerHTML=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',1600); }
@@ -784,7 +785,7 @@ let clearT=0;
 $('clearBtn').addEventListener('click',()=>{ const b=$('clearBtn');   // 2回おして実行（まちがい防止）
   if(b.classList.contains('warn')){ clearTimeout(clearT); b.classList.remove('warn'); resetLayout(); }
   else { b.classList.add('warn'); b.textContent='もう1<ruby>回<rt>かい</rt></ruby> おすと けす'.replace(/<[^>]+>/g,''); clearT=setTimeout(()=>{ b.classList.remove('warn'); refreshUI(); },2500); } });
-document.querySelectorAll('.lv').forEach(b=>b.addEventListener('click',()=>{ audioOn(); setLevel(+b.dataset.lv); }));
+document.querySelectorAll('.lv').forEach(b=>b.addEventListener('click',()=>{ audioOn(); $('intro').classList.remove('open'); $('help').classList.remove('open'); state.paused=false; setLevel(+b.dataset.lv); }));
 $('helpBtn').addEventListener('click',()=>{ $('help').classList.add('open'); state.paused=true; });
 $('startBtn').addEventListener('click',()=>{ audioOn(); $('help').classList.remove('open'); state.paused=false; });
 
