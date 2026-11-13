@@ -69,6 +69,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 #selbar button{background:#e8eef2;font-size:16px;padding:0 10px;min-height:48px;min-width:48px;white-space:nowrap}
 #selbar #delBtn{background:#ffd9d4}
 #selbar #optBtn{background:#d3f0dc}
+@media (max-width:1100px){.lv{font-size:13px;padding:0 7px}#title{font-size:18px}}
 @media (max-width:900px){#cards{grid-template-columns:repeat(2,1fr)}#go{width:80px;font-size:16px}}
 @media (max-width:640px){#title{display:none}#rotBtn,#slowBtn{font-size:12px!important;padding:0 6px!important}.lv{font-size:13px;padding:0 7px}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:12px;z-index:10}
@@ -93,11 +94,11 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 </script>
 </head>
 <body>
-<!-- build: 2026-11-13c -->
+<!-- build: 2026-11-13d -->
 <canvas id="c"></canvas>
 <div id="top">
   <div id="title">ピタゴラ５</div>
-  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button><button class="lv" data-lv="4"></button><button class="lv" data-lv="5"></button>
+  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button><button class="lv" data-lv="4"></button><button class="lv" data-lv="5"></button><button class="lv" data-lv="6"></button>
   <button id="helpBtn" aria-label="あそびかた">？</button>
 </div>
 <div id="mission"></div>
@@ -135,7 +136,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
     <li><span class="ic">▶</span>「スタート」で <ruby>玉<rt>たま</rt></ruby>が ころがる。ゴールに <ruby>入<rt>はい</rt></ruby>れば せいこう！</li>
     <li><span class="ic">🔄</span>「してん」ボタンを おすと、<ruby>画面<rt>がめん</rt></ruby>を なぞって <ruby>見<rt>み</rt></ruby>る <ruby>向<rt>む</rt></ruby>きを かえられる</li>
     <li><span class="ic">⏪</span><ruby>止<rt>と</rt></ruby>まったら「<ruby>時間<rt>じかん</rt></ruby>」の バーで まきもどして、たしかめよう</li>
-    <li><span class="ic">①</span>レベル1は れんしゅう。レベル2〜5で パーツの つかい<ruby>方<rt>かた</rt></ruby>を おぼえよう</li>
+    <li><span class="ic">①</span>レベル1は れんしゅう。レベル2〜6で パーツの つかい<ruby>方<rt>かた</rt></ruby>を おぼえよう</li>
   </ol>
   <button id="startBtn">はじめる</button>
 </div></div>
@@ -144,7 +145,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
   <ul id="introList"></ul>
   <button id="introClose">やってみる</button>
 </div></div>
-<div id="ver">v2026-11-13c</div>
+<div id="ver">v2026-11-13d</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -271,7 +272,7 @@ Object.assign(CFG, {
   BDEPTH: 1.6,                 // つくるモードの部品の奥行き
   SPRING_BV: [12, 17, 22],     // ばねの強さ（よわい・ふつう・つよい）
   PEND_L: 3,                   // ふりこの長さ
-  SEESAW_LIM: 0.5,             // シーソーがかたむく限界（ラジアン）
+  SEESAW_LIM: 0.5, SEESAW_KICK: 1.0, SEESAW_VMAX: 18,             // シーソーがかたむく限界（ラジアン）
   SPIN_W: 2.5,                 // かざぐるまの回る速さ
   B_TIME_LIMIT: 20, GRASS: 0.992, MAX_PARTS: 40, GRID: 0.5
 });
@@ -324,7 +325,7 @@ function createBuildSim(C, layout, eps){
   box(BOARD.W/2,-0.5,BOARD.W+10,1,0,{look:'ground'});
   // 左右の見えない壁（ふりこの玉だけは通りぬける：壁にはりついて止まるのを防ぐ）
   box(-0.5,13,1,28,0,{look:'hidden'}).collisionFilterMask=1; box(BOARD.W+0.5,13,1,28,0,{look:'hidden'}).collisionFilterMask=1;
-  const pos=settle(layout), balls=[], spinners=[], seesaws=[], pending=[], cool={}; let goal=null, slowMovers=false;
+  const seeKick=[], pos=settle(layout), balls=[], spinners=[], seesaws=[], pending=[], cool={}; let goal=null, slowMovers=false;
   const s={ world, parts, dyn, events, deco, fires, t:0, steps:0, status:'run', failAt:0, ms:[0,0,0,0,0,0], fired:0, build:true, info:{} };
   layout.forEach((p,pi)=>{ const a=ANG(p.rot), x=pos[pi].x, y=pos[pi].y, o=p.opt||0, wood=p.lock?'locked':'wood';
     if(p.type==='ball'){ const b=new C.Body({mass:1,material:M.ball}); b.addShape(new C.Sphere(R)); b.position.set(x+eps*0.5,y,0); b.linearDamping=0.02; b.angularDamping=0.02;
@@ -343,7 +344,11 @@ function createBuildSim(C, layout, eps){
       addDyn(b,'bob',{pi}); world.addConstraint(new C.PointToPointConstraint(b,new C.Vec3(0,L,0),an,new C.Vec3(0,0,0)));
       deco.push({k:'rod',x,y,di:dyn.length-1}); slowMovers=true; }
     else if(p.type==='seesaw'){ const an=new C.Body({mass:0}); an.position.set(x,y,0); world.addBody(an);
-      const b=new C.Body({mass:1.2,material:M.st}); b.addShape(new C.Box(new C.Vec3(2.5,0.15,D/2))); b.position.set(x,y,0); b.quaternion.setFromAxisAngle(Z,a); b.angularDamping=0.4;
+      const b=new C.Body({mass:1.2,material:M.st}); b.addShape(new C.Box(new C.Vec3(2.5,0.15,D/2))); // 両はしに ふち（玉がのったまま とばせるように）
+      b.addShape(new C.Box(new C.Vec3(0.1,0.25,D/2)),new C.Vec3(-2.4,0.4,0)); b.addShape(new C.Box(new C.Vec3(0.1,0.25,D/2)),new C.Vec3(2.4,0.4,0)); b.position.set(x,y,0); b.quaternion.setFromAxisAngle(Z,a); b.angularDamping=0.4;
+      // 玉が いきおいよく のると、シーソーを つよく まわす（てこで とばしやすくするためのチート）
+      b.addEventListener('collide',e=>{ if(!balls.includes(e.body)) return; const v=Math.abs(e.contact.getImpactVelocityAlongNormal());
+        if(v>3) seeKick.push({b,hit:e.body,side:Math.sign(e.body.position.x-b.position.x)||1,v:Math.max(v,e.body.prevSpeed||0)}); });   // 当たる直前の はやさを使う（当たり方で ぶれないように）
       addDyn(b,'seesaw',{pi}); world.addConstraint(new C.PointToPointConstraint(b,new C.Vec3(0,0,0),an,new C.Vec3(0,0,0))); seesaws.push(b); deco.push({k:'stand',x,y}); }
     else if(p.type==='spinner'){ const b=new C.Body({mass:0,type:C.Body.KINEMATIC,material:M.st}); b.addShape(new C.Box(new C.Vec3(2,0.15,D/2)));
       const q=new C.Quaternion(); q.setFromAxisAngle(Z,Math.PI/2); b.addShape(new C.Box(new C.Vec3(2,0.15,D/2)),new C.Vec3(0,0,0),q); b.position.set(x,y,0);
@@ -359,6 +364,13 @@ function createBuildSim(C, layout, eps){
     if(s.status!=='run') return;
     for(const sp of spinners){ sp.b.quaternion.setFromAxisAngle(Z,sp.w*s.t); sp.b.angularVelocity.set(0,0,sp.w); }
     world.step(H); s.t+=H; s.steps++;
+    // シーソーの はんたいがわに のっている玉を、決まった いきおいで とばす（ばねと同じく、毎回同じ とび方にするための チート）
+    while(seeKick.length){ const k=seeKick.shift(), b=k.b; if(s.t-(b.lastKick||-1)<0.4) continue;
+      const an=2*Math.atan2(b.quaternion.z,b.quaternion.w), c=Math.cos(an), sn=Math.sin(an); let fired=false;
+      for(const o of balls){ if(o===k.hit) continue; const dx=o.position.x-b.position.x, dy=o.position.y-b.position.y, lx=dx*c+dy*sn, ly=-dx*sn+dy*c;
+        if(Math.sign(lx)===-k.side&&Math.abs(lx)>1.2&&Math.abs(lx)<2.7&&ly>0&&ly<1.3){ const v=Math.min(CFG.SEESAW_VMAX,k.v*CFG.SEESAW_KICK), L=CFG.SEESAW_LIM;
+          o.position.x+=-sn*0.2; o.position.y+=c*0.2; o.velocity.set(k.side*Math.sin(L)*v,Math.cos(L)*v,0); o.angularVelocity.set(0,0,0); fired=true; } }
+      if(fired){ b.angularVelocity.z=-k.side*2; b.lastKick=s.t; events.push({k:'clack'}); } }
     for(const b of seesaws){ const an=2*Math.atan2(b.quaternion.z,b.quaternion.w), L=CFG.SEESAW_LIM;
       if(an>L){ b.quaternion.setFromAxisAngle(Z,L); if(b.angularVelocity.z>0) b.angularVelocity.z=0; }
       else if(an<-L){ b.quaternion.setFromAxisAngle(Z,-L); if(b.angularVelocity.z<0) b.angularVelocity.z=0; } }
@@ -366,6 +378,7 @@ function createBuildSim(C, layout, eps){
       if((bp.x-f.x)*nx+(bp.y-f.y)*ny<-0.35 || s.t-(cool[f.pi]||-1)<0.25) continue;
       // 玉をばねの真上にのせ直してから打ち出す（毎回同じ飛び方にするためのチート）
       cool[f.pi]=s.t; bp.set(f.x+nx*(0.2+R+0.03),f.y+ny*(0.2+R+0.03),0); f.ball.velocity.set(nx*f.v,ny*f.v,0); f.ball.angularVelocity.set(0,0,0); fires.push({pi:f.pi,t:s.t}); events.push({k:'spring'}); }
+    for(const b of balls) b.prevSpeed=b.velocity.length();
     for(const b of balls) if(b.position.y<R+0.08) { b.velocity.x*=CFG.GRASS; b.angularVelocity.z*=CFG.GRASS; }   // 床は芝生：玉がいつまでも転がり続けないようにする
     let inGoal=false; if(goal) for(const b of balls){ const p=b.position; if(Math.abs(p.x-goal.x)<1.0&&p.y>goal.y&&p.y<goal.y+1.15) inGoal=true; }
     winT=inGoal?winT+H:0; if(winT>0.4){ s.status='win'; events.push({k:'win'}); return; }
@@ -392,12 +405,15 @@ const BUILD_LEVELS = [
             ['spinner','かざぐるま','ずっと まわって、ふれた <ruby>玉<rt>たま</rt></ruby>を はじく'] ],
     parts:[ P('plankL',6.5,12.5,0,0,1), P('ball',8,13.2,0,0,1), P('plankL',13.5,9.5,-1,0,1), P('plankL',19.5,6,-2,0,1),
             P('plankS',26.5,3,6,0,1), P('goal',25.5,0.5,0,0,1) ] },
-  { tab:'5', mission:'<ruby>玉<rt>たま</rt></ruby>を おいて ころがし、だんの <ruby>上<rt>うえ</rt></ruby>の <ruby>玉<rt>たま</rt></ruby>を ゴールへ', allow:['ball','domino','seesaw','plankL','plankS'],
-    intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける（3こまで）'],
-            ['domino','ドミノ','たおれると となりも たおれる。ならべて つなごう'],
-            ['seesaw','シーソー','まん<ruby>中<rt>なか</rt></ruby>で ささえた いた。かたほうに のると かたむく'] ],
-    parts:[ P('plankL',4.5,14,-2,0,1), P('plankL',10.5,12.5,0,0,1), P('plankS',13.85,11.95,6,0,1), P('plankS',15,13.3,0,0,1),
-            P('ball',14.5,14,0,0,1), P('goal',18.5,0.5,0,0,1) ] },
+  { tab:'5', mission:'さかの <ruby>上<rt>うえ</rt></ruby>に <ruby>玉<rt>たま</rt></ruby>を おいて、ドミノを たおそう', allow:['ball','domino','plankL','plankS'],
+    hint:[[2.5,16]],
+    intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける。さかの <ruby>上<rt>うえ</rt></ruby>に おいてみよう'],
+            ['domino','ドミノ','たおれると となりも たおれる。あいだを あけすぎないで、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>の そばまで ならべよう'] ],
+    parts:[ P('plankL',4.5,14,-2,0,1), P('plankL',10.5,12.5,0,0,1), P('plankL',16.5,12.5,0,0,1), P('ball',19,13.2,0,0,1), P('goal',22,0.5,0,0,1) ] },
+  { tab:'6', mission:'シーソーの みぎはしに <ruby>高<rt>たか</rt></ruby>い ところから <ruby>玉<rt>たま</rt></ruby>を おとして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばそう', allow:['ball','seesaw','plankL','plankS'],
+    hint:[[12,12]],
+    intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が おちると、はんたいがわの <ruby>玉<rt>たま</rt></ruby>が とぶ。<ruby>高<rt>たか</rt></ruby>い ところから おとすほど、よく とぶよ'] ],
+    parts:[ P('seesaw',10,2,2,0,1), P('ball',8.1,3,0,0,1), P('plankS',16,3.5,0,0,1), P('goal',16,4,0,0,1) ] },
   { tab:'じゆう', free:true, mission:'すきな そうちを つくろう', allow:['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'],
     intro:[], parts:[] }
 ];
@@ -469,6 +485,7 @@ const MAT={
   ghost:std({color:0xf06595,transparent:true,opacity:0.18}), spring:std({color:0xf08c00,roughness:0.4}), springbase:std({color:0xc76a00,roughness:0.5}), coil:std({map:TEX.coil,metalness:0.4,roughness:0.4}),
   seesaw:std({color:0x0ca6a6,roughness:0.5}), spinner:std({color:0xae3ec9,roughness:0.5}), arrow:std({color:0xffe066,roughness:0.4}),
   board:std({map:TEX.board,roughness:1}), floor:std({map:TEX.floor,roughness:1}), pole:std({color:0x666666}),
+  hint:new THREE.MeshBasicMaterial({color:0xe8590c,transparent:true,opacity:0.3}),
   hi:new THREE.MeshBasicMaterial({color:0xffe600,transparent:true,opacity:0.35,depthTest:false}),
   conf:BAR_COL.map(c=>new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}))
 };
@@ -506,7 +523,7 @@ function buildWorld(){
     else if(k==='ball') m=add(GEO_SPH,[MAT.ballA,MAT.ballB,MAT.ballC][d.n%3],0,0,0);
     else if(k==='bob') m=add(GEO_SPH,MAT.metal,0,0,0);
     else if(k==='domino') m=add(boxGeo(CFG.DOMINO.t,CFG.DOMINO.h,D*0.7),MAT.doms[d.i%6],0,0,0);
-    else if(k==='seesaw') m=add(boxGeo(5,0.3,D),MAT.seesaw,0,0,0);
+    else if(k==='seesaw'){ m=new THREE.Group(); group.add(m); add(boxGeo(5,0.3,D),MAT.seesaw,0,0,0,0,true,m); add(boxGeo(0.2,0.5,D),MAT.seesaw,-2.4,0.4,0,0,true,m); add(boxGeo(0.2,0.5,D),MAT.seesaw,2.4,0.4,0,0,true,m); }
     else { m=new THREE.Group(); group.add(m); add(boxGeo(4,0.3,D),MAT.spinner,0,0,0,0,true,m); add(boxGeo(0.3,4,D),MAT.spinner,0,0,0,0,true,m); }
     dynMesh.push(m); }
   if(tut) decorateTut(D); else decorateBuild(D);
@@ -550,6 +567,9 @@ function decorateBuild(D){
       springsV.push({pi:d.pi,coil:c,plate}); }
     else if(d.k==='flag') addFlag(d.x+1.3,d.y+1.15,d.x,d.y+0.8,3.2);
   }
+  // 「ここ」の目印（自分の玉を まだ おいていない ときだけ）
+  if(state.mode==='edit'&&BL().hint&&!L.some(p=>p.type==='ball'&&!p.lock)) for(const [hx,hy] of BL().hint){
+    add(GEO_SPH,MAT.hint,hx,hy,0,0,false); const s=label('ここ','#e8590c','#fff',1.0); s.position.set(hx,hy+1.2,D/2+0.3); group.add(s); }
   // えらんでいるパーツを黄色く光らせる
   if(state.mode==='edit'&&state.sel>=0&&L[state.sel]){ const h=hitBox(state.sel); const m=add(boxGeo(h.w+0.5,h.h+0.5,0.05),MAT.hi,h.x,h.y,D/2+0.2,h.a,false); m.renderOrder=4; }
 }
@@ -715,7 +735,7 @@ function addPart(type){
   const L=layout(), sp=PARTS[type];
   if(L.length>=CFG.MAX_PARTS){ toast('これ <ruby>以上<rt>いじょう</rt></ruby>は おけないよ'); return -1; }
   if(sp.max&&L.filter(p=>p.type===type).length>=sp.max){ toast(`${sp.name}は ${sp.max}こ まで`); return -1; }
-  let x=BOARD.W/2, y=12; for(let i=0;i<40&&L.some(p=>Math.abs(p.x-x)<1.2&&Math.abs(p.y-y)<0.8);i++){ x+=2; if(x>BOARD.W-3){ x=4; y-=1.5; } }
+  let x=BOARD.W/2, y=12; if(type==='ball'&&BL().hint&&!L.some(p=>p.type==='ball'&&!p.lock)){ x=BL().hint[0][0]; y=BL().hint[0][1]; } for(let i=0;i<40&&L.some(p=>Math.abs(p.x-x)<1.2&&Math.abs(p.y-y)<0.8);i++){ x+=2; if(x>BOARD.W-3){ x=4; y-=1.5; } }
   L.push(P(type,x,y,0,sp.opt0||0)); state.sel=L.length-1; changed();
   if(type==='spring') toast('↺ ↻ で、とぶ <ruby>向<rt>む</rt></ruby>きを かえられるよ');
   return state.sel; }
