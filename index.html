@@ -20,17 +20,17 @@ html,body{margin:0;height:100%;overflow:hidden;touch-action:manipulation;font-fa
 rt{font-size:.55em;font-weight:400}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width:44px;min-height:44px;cursor:pointer;color:#333}
-#top{position:fixed;top:8px;left:8px;right:8px;display:flex;gap:6px;align-items:center;pointer-events:none;z-index:11}
-#top>*{pointer-events:auto}
-#title{font-size:22px;font-weight:700;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 2px 0 #0002;white-space:nowrap}
-.lv{background:#fff;font-size:15px;padding:0 10px;box-shadow:0 2px 0 #0002;white-space:nowrap}
-.lv.on{background:#ffd54a}
-#helpBtn{margin-left:auto;width:48px;height:48px;border-radius:50%;font-size:24px;background:#fff;box-shadow:0 2px 0 #0002;flex:none}
-#mission{position:fixed;top:62px;left:8px;background:#fffc;border-radius:10px;padding:2px 12px;font-size:16px;font-weight:700;line-height:1.9;max-width:calc(100vw - 16px);pointer-events:none}
-#banner{position:fixed;top:62px;left:50%;transform:translateX(-50%);background:#fff;border-radius:14px;padding:8px 14px;
+.corner{position:fixed;top:6px;z-index:12;background:#fffe;box-shadow:0 2px 0 #0002;font-size:22px;line-height:1}
+#menuBtn{left:6px;height:44px;padding:0 10px;display:flex;align-items:center;gap:4px}
+#menuBtn small{font-size:13px}
+#helpBtn{right:6px;width:44px;height:44px;border-radius:50%}
+body.inmenu .corner,body.inmenu #genInfo{display:none!important}
+#mission{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:#fffc;border-radius:10px;padding:0 12px;font-size:15px;font-weight:700;line-height:1.75;max-width:calc(100vw - 190px);pointer-events:none;text-align:center}
+#banner{position:fixed;top:6px;left:50%;transform:translateX(-50%);background:#fff;border-radius:14px;padding:8px 14px;
   font-size:19px;font-weight:700;box-shadow:0 3px 0 #0003;display:none;align-items:center;gap:12px;width:max-content;max-width:94vw;line-height:1.7}
 #banner.win{background:#fff3b0}#banner.fail{background:#ffe1dc}
 #banner button{background:#2e9e5b;color:#fff;font-size:18px;padding:0 14px;white-space:nowrap}
+#banner #bannerBtn2{background:#e8eef2;color:#333;display:none}
 #toast{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);background:#333d;color:#fff;border-radius:12px;padding:10px 18px;font-size:18px;font-weight:700;display:none;pointer-events:none;z-index:5}
 #panel{position:fixed;left:0;right:0;bottom:0;background:#fffd;padding:6px 8px calc(6px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column;gap:6px;border-top:2px solid #0001}
@@ -73,9 +73,8 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 #selbar button{background:#e8eef2;font-size:16px;padding:0 10px;min-height:48px;min-width:48px;white-space:nowrap}
 #selbar #delBtn{background:#ffd9d4}
 #selbar #optBtn{background:#d3f0dc}
-@media (max-width:1100px){.lv{font-size:13px;padding:0 7px}#title{font-size:18px}}
 @media (max-width:900px){#cards{grid-template-columns:repeat(2,1fr)}#go{width:80px;font-size:16px}}
-@media (max-width:640px){#title{display:none}#rotBtn,#slowBtn{font-size:12px!important;padding:0 6px!important}.lv{font-size:13px;padding:0 7px}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}}
+@media (max-width:640px){#rotBtn,#slowBtn{font-size:12px!important;padding:0 6px!important}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}#menuBtn small{display:none}#mission{font-size:13px;max-width:calc(100vw - 120px)}}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:64px 12px 12px;z-index:10}
 .modal.open{display:flex}
 .box{background:#fff;border-radius:18px;padding:14px 18px;max-width:640px;width:100%;max-height:94vh;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -85,7 +84,33 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 .box .ic{display:inline-block;width:34px;text-align:center;font-size:20px}
 .box svg{width:100%;height:auto;background:#eef7fc;border-radius:12px}
 #startBtn{display:block;margin:8px auto 0;background:#e8590c;color:#fff;font-size:22px;padding:0 36px;min-height:56px}
-#ver{position:fixed;right:6px;top:58px;font-size:10px;color:#0006;pointer-events:none}
+#ver{position:fixed;right:6px;top:52px;font-size:10px;color:#0006;pointer-events:none;z-index:13}
+#genInfo{position:fixed;right:6px;top:64px;font-size:10px;color:#0006;pointer-events:none}
+/* ---- メニュー画面 ---- */
+#menu{position:fixed;inset:0;z-index:9;display:none;background:radial-gradient(circle at 20% 15%,#fff6 0 6%,transparent 7%),radial-gradient(circle at 85% 30%,#fff5 0 4%,transparent 5%),radial-gradient(circle at 70% 85%,#fff5 0 5%,transparent 6%),linear-gradient(#bfe9ff,#fdf3d6)}
+#menu.open{display:block}
+.mwrap{height:100%;overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 18px 24px;max-width:980px;margin:0 auto}
+.mtitle{margin:4px 0 0;text-align:center;font-size:clamp(46px,9vw,84px);letter-spacing:4px;line-height:1.15}
+.mtitle span{display:inline-block;color:#fff;-webkit-text-stroke:3px #333;paint-order:stroke;text-shadow:0 5px 0 #0003;animation:bob 2.4s ease-in-out infinite}
+.mtitle span:nth-child(1){color:#e03131}.mtitle span:nth-child(2){color:#f08c00;animation-delay:.2s}.mtitle span:nth-child(3){color:#f2c200;animation-delay:.4s}
+.mtitle span:nth-child(4){color:#2e9e5b;animation-delay:.6s}.mtitle span:nth-child(5){color:#1c7ed6;animation-delay:.8s}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+.msub{text-align:center;font-size:19px;font-weight:700;margin:2px 0 6px;line-height:1.9}
+.mhead{font-size:20px;margin:10px 4px 6px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+.mcard{position:relative;min-height:128px;border-radius:22px;padding:10px 10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:22px;line-height:1.5;box-shadow:0 6px 0 #0003;background:var(--c);color:#333;border:4px solid #fff}
+.mcard:active{transform:translateY(4px);box-shadow:0 2px 0 #0003}
+.mcard .mn{font-size:27px;white-space:nowrap}
+.mcard small{font-size:14px;font-weight:700;opacity:.8;line-height:1.6}
+.mcard .ic{display:flex;gap:2px}.mcard .ic svg{width:44px;height:31px;background:#fff8;border-radius:8px}
+.mcard .star{position:absolute;top:4px;right:8px;font-size:22px}
+#mHelp{display:block;margin:18px auto 0;background:#fff;font-size:19px;padding:0 26px;min-height:52px;box-shadow:0 4px 0 #0002;border-radius:26px}
+#busy{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;pointer-events:none}
+#busy.on{display:flex}
+#busy>div{background:#fff;border-radius:18px;padding:14px 22px;font-size:20px;font-weight:700;box-shadow:0 4px 0 #0003;text-align:center}
+#busy .spin{font-size:42px;display:inline-block;animation:spin 1.2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ==== スマホ（画面が低いとき）だけに効く調整（スマホ用パネル調整）。iPadには影響しない ==== */
 @media (orientation:landscape) and (max-height:500px), (orientation:portrait) and (max-height:700px){
@@ -110,16 +135,24 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
 }
 </script>
 </head>
-<body>
-<!-- build: 2026-11-13e -->
+<body class="inmenu">
+<!-- build: 2026-11-15b -->
 <canvas id="c"></canvas>
-<div id="top">
-  <div id="title">ピタゴラ５</div>
-  <button class="lv" data-lv="0"></button><button class="lv" data-lv="1"></button><button class="lv" data-lv="2"></button><button class="lv" data-lv="3"></button><button class="lv" data-lv="4"></button><button class="lv" data-lv="5"></button><button class="lv" data-lv="6"></button>
-  <button id="helpBtn" aria-label="あそびかた">？</button>
-</div>
+<button id="menuBtn" class="corner" aria-label="メニューへ もどる">☰<small>メニュー</small></button>
+<button id="helpBtn" class="corner" aria-label="あそびかた">？</button>
+<div id="menu" class="open"><div class="mwrap">
+  <h1 class="mtitle" aria-label="ピタゴラ５"><span>ピ</span><span>タ</span><span>ゴ</span><span>ラ</span><span>５</span></h1>
+  <p class="msub">しかけを つないで、<ruby>玉<rt>たま</rt></ruby>を ゴールへ とどけよう！</p>
+  <h2 class="mhead">📘 レベル</h2>
+  <div class="mgrid" id="mLevels"></div>
+  <h2 class="mhead">🎲 ランダム</h2>
+  <div class="mgrid" id="mRandom"></div>
+  <button id="mHelp">？ あそび<ruby>方<rt>かた</rt></ruby></button>
+</div></div>
+<div id="busy"><div><div class="spin">⚙️</div>そうちを つくっているよ…</div></div>
+<div id="genInfo"></div>
 <div id="mission"></div>
-<div id="banner"><span id="bannerTxt"></span><button id="bannerBtn"></button></div>
+<div id="banner"><span id="bannerTxt"></span><button id="bannerBtn2"></button><button id="bannerBtn"></button></div>
 <div id="toast"></div>
 <div id="selbar"><span id="selName"></span><button id="rotL" aria-label="ひだりに かたむける">↺</button><button id="rotR" aria-label="みぎに かたむける">↻</button><button id="optBtn"></button><button id="delBtn">🗑 けす</button></div>
 <div id="panel">
@@ -153,7 +186,7 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
     <li><span class="ic">▶</span>「スタート」で <ruby>玉<rt>たま</rt></ruby>が ころがる。ゴールに <ruby>入<rt>はい</rt></ruby>れば せいこう！</li>
     <li><span class="ic">🔄</span>「してん」ボタンを おすと、<ruby>画面<rt>がめん</rt></ruby>を なぞって <ruby>見<rt>み</rt></ruby>る <ruby>向<rt>む</rt></ruby>きを かえられる</li>
     <li><span class="ic">⏪</span><ruby>止<rt>と</rt></ruby>まったら「<ruby>時間<rt>じかん</rt></ruby>」の バーで まきもどして、たしかめよう</li>
-    <li><span class="ic">①</span>レベル1は れんしゅう。レベル2〜6で パーツの つかい<ruby>方<rt>かた</rt></ruby>を おぼえよう</li>
+    <li><span class="ic">☰</span>「メニュー」で、レベルや ランダムの そうちを えらべるよ</li>
   </ol>
   <button id="startBtn">はじめる</button>
 </div></div>
@@ -162,12 +195,10 @@ button{font-family:inherit;font-weight:700;border:0;border-radius:12px;min-width
   <ul id="introList"></ul>
   <button id="introClose">やってみる</button>
 </div></div>
-<div id="ver">v2026-11-13e</div>
+<div id="ver">v2026-11-15b</div>
 
-<script type="module">
-import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
-
+<script type="text/plain" id="sim-src">
+/*__SIM__*/
 // ===== 設定（数値だけ直せば調整できます） =====
 const CFG = {
   G: 25,            // 重力
@@ -348,7 +379,7 @@ function createBuildSim(C, layout, eps){
     if(p.type==='ball'){ const b=new C.Body({mass:1,material:M.ball}); b.addShape(new C.Sphere(R)); b.position.set(x+eps*0.5,y,0); b.linearDamping=0.02; b.angularDamping=0.02;
       b.addEventListener('collide',e=>{ const v=Math.abs(e.contact.getImpactVelocityAlongNormal());
         if(e.body.material===M.ball&&v>0.8) events.push({k:'clack'}); else if(e.body.material===M.st&&v>3.5) events.push({k:'knock'}); });
-      addDyn(b,'ball',{pi,n:balls.length}); balls.push(b); }
+      addDyn(b,'ball',{pi,n:balls.length}); balls.push(b); b.locked=!!p.lock; }
     else if(p.type==='plankL'||p.type==='plankS') box(x,y,PARTS[p.type].w,0.3,a,{look:wood});
     else if(p.type==='domino'){ const d=PARTS.domino, b=new C.Body({mass:0.4,material:M.dom}); b.addShape(new C.Box(new C.Vec3(d.w/2,d.h/2,D*0.35))); b.position.set(x,y,0);
       b.addEventListener('collide',e=>{ if(Math.abs(e.contact.getImpactVelocityAlongNormal())>1.2) events.push({k:'tok'}); }); addDyn(b,'domino',{pi,i:dyn.length}); }
@@ -372,7 +403,7 @@ function createBuildSim(C, layout, eps){
       world.addBody(b); dyn.push({body:b,kind:'spinner',pi}); spinners.push({b,w:o?CFG.SPIN_W:-CFG.SPIN_W}); deco.push({k:'hub',x,y,pi}); slowMovers=true; }
     else if(p.type==='chime'){ const b=box(x,y,1.8,0.25,a,{look:'bar',mat:'bar',idx:o}); let last=-1;
       b.addEventListener('collide',e=>{ if(balls.includes(e.body)&&s.t-last>0.15){ last=s.t; events.push({k:'bar',i:o}); } }); }
-    else if(p.type==='goal'){ box(x,y-0.15,2.9,0.3,0,{look:'goal'}); box(x-1.3,y+0.5,0.3,1.3,0,{look:'goal'}); box(x+1.3,y+0.5,0.3,1.3,0,{look:'goal'}); goal={x,y}; deco.push({k:'flag',x,y}); }
+    else if(p.type==='goal'){ box(x,y-0.15,2.9,0.3,0,{look:'goal'}); box(x-1.3,y+0.5,0.3,1.3,0,{look:'goal'}); box(x+1.3,y+0.5,0.3,1.3,0,{look:'goal'}); goal={x,y,lockOnly:o===1}; deco.push({k:'flag',x,y,red:o===1}); }
   });
   s.info={goal, balls:balls.length};
   const movers=dyn.filter(d=>d.kind==='ball'||d.kind==='domino'||d.kind==='seesaw');
@@ -397,7 +428,8 @@ function createBuildSim(C, layout, eps){
       cool[f.pi]=s.t; bp.set(f.x+nx*(0.2+R+0.03),f.y+ny*(0.2+R+0.03),0); f.ball.velocity.set(nx*f.v,ny*f.v,0); f.ball.angularVelocity.set(0,0,0); fires.push({pi:f.pi,t:s.t}); events.push({k:'spring'}); }
     for(const b of balls) b.prevSpeed=b.velocity.length();
     for(const b of balls) if(b.position.y<R+0.08) { b.velocity.x*=CFG.GRASS; b.angularVelocity.z*=CFG.GRASS; }   // 床は芝生：玉がいつまでも転がり続けないようにする
-    let inGoal=false; if(goal) for(const b of balls){ const p=b.position; if(Math.abs(p.x-goal.x)<1.0&&p.y>goal.y&&p.y<goal.y+1.15) inGoal=true; }
+    let inGoal=false; if(goal) for(const b of balls){ if(goal.lockOnly&&!b.locked) continue; const p=b.position;   // opt=1 のゴールは 赤い玉（動かせない玉）だけ
+      if(Math.abs(p.x-goal.x)<1.0&&p.y>goal.y&&p.y<goal.y+1.15) inGoal=true; }
     winT=inGoal?winT+H:0; if(winT>0.4){ s.status='win'; events.push({k:'win'}); return; }
     let mx=0; for(const d of movers){ const v=d.body.velocity.length()+Math.abs(d.body.angularVelocity.z)*0.5; if(v>mx) mx=v; }
     stallT=(mx<0.25&&s.t>1)?stallT+H:0;
@@ -417,20 +449,21 @@ const BUILD_LEVELS = [
     intro:[ ['spring','ばね','のった <ruby>玉<rt>たま</rt></ruby>を はじきとばす。↺ ↻ で とぶ <ruby>向<rt>む</rt></ruby>き、ボタンで つよさを かえる'],
             ['tramp','トランポリン','<ruby>落<rt>お</rt></ruby>ちてきた <ruby>玉<rt>たま</rt></ruby>が はねかえる'] ],
     parts:[ P('plankS',3.5,5.5,-1,0,1), P('ball',3,6.5,0,0,1), P('plankS',15,6.5,0,0,1), P('goal',15,7,0,0,1) ] },
-  { tab:'4', mission:'<ruby>止<rt>と</rt></ruby>まっている <ruby>玉<rt>たま</rt></ruby>を、ふりこ や かざぐるまで うごかそう', allow:['plankL','plankS','pend','spinner'],
+  { tab:'4', mission:'<ruby>止<rt>と</rt></ruby>まっている <ruby>玉<rt>たま</rt></ruby>を ふりこ や かざぐるまで うごかして、ゴールまで とどけよう', allow:['plankL','plankS','pend','spinner'],
     intro:[ ['pend','ふりこ','スタートすると ふりおろして、ぶつかった ものを おす'],
             ['spinner','かざぐるま','ずっと まわって、ふれた <ruby>玉<rt>たま</rt></ruby>を はじく'] ],
-    parts:[ P('plankL',6.5,12.5,0,0,1), P('ball',8,13.2,0,0,1), P('plankL',13.5,9.5,-1,0,1), P('plankL',19.5,6,-2,0,1),
-            P('plankS',26.5,3,6,0,1), P('goal',25.5,0.5,0,0,1) ] },
-  { tab:'5', mission:'さかの <ruby>上<rt>うえ</rt></ruby>に <ruby>玉<rt>たま</rt></ruby>を おいて、ドミノを たおそう', allow:['ball','domino','plankL','plankS'],
+    // 正解の例：ふりこ (4.5,17) かたむき-4 ＋ ながい いた (9.5,7) かたむき+2（玉を ひだりへ もどす）
+    parts:[ P('ball',5.5,13.7,0,0,1), P('plankL',5,13,0,0,1), P('goal',4,0.5,0,0,1) ] },
+  { tab:'5', mission:'じぶんの <ruby>玉<rt>たま</rt></ruby>で <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を おして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','domino','plankL','plankS'],
     hint:[[2.5,16]],
     intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける。さかの <ruby>上<rt>うえ</rt></ruby>に おいてみよう'],
-            ['domino','ドミノ','たおれると となりも たおれる。あいだを あけすぎないで、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>の そばまで ならべよう'] ],
-    parts:[ P('plankL',4.5,14,-2,0,1), P('plankL',10.5,12.5,0,0,1), P('plankL',16.5,12.5,0,0,1), P('ball',19,13.2,0,0,1), P('goal',22,0.5,0,0,1) ] },
-  { tab:'6', mission:'シーソーの みぎはしに <ruby>高<rt>たか</rt></ruby>い ところから <ruby>玉<rt>たま</rt></ruby>を おとして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばそう', allow:['ball','seesaw','plankL','plankS'],
-    hint:[[12,12]],
+            ['domino','ドミノ','たおれると となりも たおれる。<ruby>玉<rt>たま</rt></ruby>の かわりに おしたり、<ruby>音<rt>おと</rt></ruby>を たのしんだり できるよ'] ],
+    // ゴール（opt 1）は 赤い玉が 入ったときだけ せいこう。正解の例：たま (2.5,16) ＋ ながい いた (8.5,11) -1 ・(14.5,10) 0 ＋ ながい いた (21.5,6.5) +2
+    parts:[ P('ball',19,10.7,0,0,1), P('plankL',4.5,14,-2,0,1), P('plankS',20,10,0,0,1), P('goal',16,0.5,0,1,1) ] },
+  { tab:'6', mission:'シーソーで <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばして、ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','seesaw','plankL','plankS'],
     intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が おちると、はんたいがわの <ruby>玉<rt>たま</rt></ruby>が とぶ。<ruby>高<rt>たか</rt></ruby>い ところから おとすほど、よく とぶよ'] ],
-    parts:[ P('seesaw',10,2,2,0,1), P('ball',8.1,3,0,0,1), P('plankS',16,3.5,0,0,1), P('goal',16,4,0,0,1) ] },
+    // 正解の例：たま (10,12) ＋ ながい いた (18,3) 0（とんだ 赤い玉を うけて ゴールへ）
+    parts:[ P('ball',6.1,3,0,0,1), P('seesaw',8,2,2,0,1), P('goal',23.5,0.5,0,1,1) ] },
   { tab:'じゆう', free:true, mission:'すきな そうちを つくろう', allow:['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'],
     intro:[], parts:[] }
 ];
@@ -442,6 +475,175 @@ const SAMPLE = [ P('pend',3,16.5,-4), P('plankL',6.5,12.5), P('plankL',12.5,12.5
   P('chime',17,10,-1,0), P('chime',19.5,8,-1,2), P('chime',22,6,-1,4), P('goal',26.5,1.5) ];
 const FREE_EMPTY = [ P('ball',3,15.5), P('plankS',3.5,14.5,-1), P('goal',24,0.5) ];
 
+// ===== ランダム出題（A：そうちを その場で つくる／B：みほんから えらぶ） =====
+// しくみ：パーツを1つずつ足していく。足すたびに物理シミュレーションを走らせて、玉が「宙をとんでいる」区間を調べ、
+// その とちゅうに 次のパーツ（いた・てっきん・トランポリン・ばね・シーソー・ドミノ）を置く。最後にゴールを置いて、
+// 重力を ±RND_EPS ずらしても ゴールできる形だけを採用する（たまたま入った形を はじくため）
+Object.assign(CFG, {
+  RND_TRIES: 30,        // A がこの回数 失敗したら、B（みほん）から えらぶ
+  RND_EPS: 0.004,       // たしかめに使う 重力のずらし
+  RND_MODS: [3, 6],     // スタートとゴールの間に入れる しかけの数
+  RND_TIME: 6000,       // A にかける時間の上限（ミリ秒）。こえたら B へ
+  RND_WAIT: 2500,       // 画面で まつ 時間の上限（ミリ秒）。こえたら B を出す（A は うらで つくりつづけて、次に使う）
+  RND_STEADY: 0         // 1つ置くごとに、重力をずらしても とび方が かわらないか たしかめる（0＝しない）
+});
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+// 部品がしめる場所（回転した長方形 {x,y,hw,hh,a} のリスト）。動く玉・ドミノ・ふりこの玉は、記録した通り道で調べる
+function partBoxes(p){ const a=ANG(p.rot), sp=PARTS[p.type];
+  switch(p.type){
+    case 'ball': case 'domino': return [];
+    case 'pend': return [{x:p.x,y:p.y,hw:0.3,hh:0.3,a:0}];
+    case 'seesaw': return [{x:p.x,y:p.y,hw:2.6,hh:0.45,a},{x:p.x,y:p.y,hw:2.6,hh:0.45,a:-a}];   // 左右どちらに かたむいても
+    case 'spinner': return [{x:p.x,y:p.y,hw:2.2,hh:2.2,a:0}];
+    case 'goal': return [{x:p.x,y:p.y+0.42,hw:1.45,hh:0.73,a:0}];
+    case 'spring': return [{x:p.x,y:p.y,hw:0.8,hh:0.25,a}];
+    default: return [{x:p.x,y:p.y,hw:sp.w/2,hh:sp.h/2,a}];
+  } }
+function boxDist(b,x,y){ const c=Math.cos(b.a), s=Math.sin(b.a), dx=x-b.x, dy=y-b.y, lx=dx*c+dy*s, ly=-dx*s+dy*c;
+  return Math.hypot(Math.max(Math.abs(lx)-b.hw,0),Math.max(Math.abs(ly)-b.hh,0)); }
+function boxHit(A,B,m){ // 回転した長方形どうしが m より近いか（分離軸）
+  for(const r of [A,B]) for(const ax of [r.a, r.a+Math.PI/2]){ const ux=Math.cos(ax), uy=Math.sin(ax);
+    const proj=b=>{ const c=Math.cos(b.a), s=Math.sin(b.a); return Math.abs(b.hw*(c*ux+s*uy))+Math.abs(b.hh*(-s*ux+c*uy)); };
+    if(Math.abs((A.x-B.x)*ux+(A.y-B.y)*uy)>proj(A)+proj(B)+m) return false; }
+  return true; }
+// 配置を走らせて、玉・ドミノ・ふりこの玉の 位置と速さを 毎ステップ記録する（ゴールなし）
+function traceSim(C,layout,act,i0,eps){ const s=createBuildSim(C,layout,eps||0), tr={}, H=CFG.H, G=CFG.G;
+  const ds=s.dyn.filter(d=>d.kind==='ball'||d.kind==='domino'||d.kind==='bob');
+  ds.forEach(d=>tr[d.pi]={kind:d.kind,x:[],y:[],vx:[],vy:[]});
+  const ta=tr[act]; let run=0, done=false;
+  while(s.status==='run'&&!done){ s.step(); for(const d of ds){ const b=d.body, t=tr[d.pi]; t.x.push(b.position.x); t.y.push(b.position.y); t.vx.push(b.velocity.x); t.vy.push(b.velocity.y); }
+    // 調べたい玉が 宙をとび終わったら、そこで やめる（時間の節約）
+    const n=ta?ta.x.length:0; if(n>=3&&n-2>=i0){ const ay=(ta.vy[n-1]-ta.vy[n-3])/(2*H), ax=(ta.vx[n-1]-ta.vx[n-3])/(2*H);
+      if(Math.abs(ay+G)<0.12*G&&Math.abs(ax)<0.12*G) run++; else { if(run>=10) done=true; run=0; } } }
+  return tr; }
+// i0 より後で、玉が はじめて 宙をとぶ区間 [a,b]（重力だけで動いている＝加速度が (0,-G) に近い）
+function flightAfter(t,i0){ const H=CFG.H, G=CFG.G, n=t.x.length; let a=-1;
+  for(let i=Math.max(1,i0);i<n-1;i++){ const ay=(t.vy[i+1]-t.vy[i-1])/(2*H), ax=(t.vx[i+1]-t.vx[i-1])/(2*H);
+    const ff=Math.abs(ay+G)<0.12*G&&Math.abs(ax)<0.12*G&&t.x[i]>0.6&&t.x[i]<BOARD.W-0.6;
+    if(ff){ if(a<0) a=i; } else if(a>=0){ if(i-a>=10) return [a,i-1]; a=-1; } }
+  return a>=0&&n-1-a>=10?[a,n-2]:null; }
+
+function genOnce(C,rng){
+  const R=CFG.BALL_R, L=[], ri=(a,b)=>a+Math.floor(rng()*(b-a+1)), rf=(a,b)=>a+rng()*(b-a), pick=a=>a[Math.floor(rng()*a.length)];
+  const q=v=>Math.round(v*20)/20, rot2=(a,lx,ly)=>({x:lx*Math.cos(a)-ly*Math.sin(a), y:lx*Math.sin(a)+ly*Math.cos(a)});
+  const nBalls=()=>L.filter(p=>p.type==='ball').length;
+  let dir=rng()<0.5?1:-1, active, iLand=0, note=ri(0,4), used=[];
+  const X=x=>dir>0?x:BOARD.W-x;   // 左右を反転できるように
+  // ---- スタート ----
+  const st=pick(['slope','slope','pend']); used.push(st);
+  if(st==='slope'){ const k=ri(1,2), rot=-dir*k, a=ANG(rot), cx=q(X(rf(3.6,5.2))), cy=q(rf(13.5,15.8));
+    L.push(P('plankL',cx,cy,rot)); const top=rot2(a,-dir*2.3,0.15+R+0.02);
+    L.push(P('ball',q(cx+top.x),q(cy+top.y))); active=1; }
+  else { const px=q(X(rf(2.2,3.5))), py=q(rf(15.6,17.2)), long=rng()<0.5;
+    L.push(P('pend',px,py,-dir*ri(4,6))); L.push(P('ball',q(px+dir*1.0),q(py-3.35))); L.push(P(long?'plankL':'plankS',q(px+dir*(long?3.5:2.0)),q(py-4.0),0)); active=1; }
+  // ---- 置いてよいか（ほかの部品と重ならない・これまでの通り道をふさがない） ----
+  function fits(news,tr,iC,clr){ clr=clr||0.12; const nb=news.flatMap(partBoxes), old=L.flatMap(partBoxes);
+    for(const b of nb){ const c=Math.cos(b.a), s=Math.sin(b.a);
+      for(const [sx,sy] of [[1,1],[1,-1],[-1,1],[-1,-1]]){ const x=b.x+sx*b.hw*c-sy*b.hh*s, y=b.y+sx*b.hw*s+sy*b.hh*c; if(x<0.2||x>BOARD.W-0.2||y<0.05||y>BOARD.H-0.2) return false; }
+      for(const o of old) if(boxHit(b,o,0.25)) return false; }
+    for(const n of news) if(n.type==='ball'||n.type==='domino'){ const rr=n.type==='ball'?R:1.0; for(const o of old) if(boxDist(o,n.x,n.y)<rr+0.2) return false; }
+    for(const k in tr){ const t=tr[k], rr=t.kind==='domino'?1.0:R, lim=(+k===active)?iC-3:t.x.length;
+      for(let i=0;i<lim;i+=2) for(const b of nb) if(boxDist(b,t.x[i],t.y[i])<rr+clr) return false;
+      if(+k!==active) for(const n of news) if(n.type==='ball'||n.type==='domino') for(let i=0;i<t.x.length;i+=3) if(Math.hypot(t.x[i]-n.x,t.y[i]-n.y)<rr+1.2) return false; }
+    return true; }
+  // ---- しかけ（宙をとんでいる玉を、とちゅうで受けとめる） ----
+  const MOD={
+    ramp(tr,i,t,type){ const x=t.x[i], y=t.y[i], vd=Math.sign(t.vx[i])||dir; let d=rng()<0.72?vd:-vd;
+      const w=PARTS[type].w, ex=dd=>x+dd*w*0.85; if(ex(d)>BOARD.W-3.5||ex(d)<3.5) d=-d; if(ex(d)>BOARD.W-3.5||ex(d)<3.5) return false;
+      const rot=-d*(type==='chime'?1:ri(1,2)), a=ANG(rot), th=PARTS[type].h, f=d===vd?rf(0.12,0.3):rf(0.62,0.8);
+      const sl=-d*w/2+d*f*w, c=rot2(a,sl,th/2+R), opt=type==='chime'?(note=(note+ri(1,2))%8):0;
+      const p=P(type,q(x-c.x),q(y-c.y),rot,opt); if(!fits([p],tr,i)) return false; L.push(p); dir=d; return true; },
+    tramp(tr,i,t){ if(t.vy[i]>-6) return false; const x=t.x[i], y=t.y[i]; let d=Math.sign(t.vx[i])||dir; if(x+d*5>BOARD.W-1||x+d*5<1) d=-d;
+      const rot=-d*ri(0,1), a=ANG(rot), c=rot2(a,rf(-0.3,0.3),0.2+R); const p=P('tramp',q(x-c.x),q(y-c.y),rot);
+      if(!fits([p],tr,i)) return false; L.push(p); dir=d; return true; },
+    spring(tr,i,t){ const x=t.x[i], y=t.y[i]; let d=rng()<0.5?1:-1; if(x+d*6>BOARD.W-1||x+d*6<1) d=-d;
+      const rot=-d*ri(1,3), a=ANG(rot), o=ri(0,2), v=CFG.SPRING_BV[o], vy=v*Math.cos(a), c=rot2(a,rf(-0.2,0.2),0.2+R);
+      const sx=x-c.x, sy=y-c.y; if(sy+vy*vy/(2*CFG.G)>BOARD.H-1) return false;
+      const p=P('spring',q(sx),q(sy),rot,o); if(!fits([p],tr,i)) return false; L.push(p); dir=d; return true; },
+    seesaw(tr,i,t){ if(t.vy[i]>-11||nBalls()>=3) return false; const x=t.x[i], y=t.y[i], side=Math.sign(t.vx[i])||dir;
+      const rot=side*2, a=ANG(rot), c=rot2(a,side*rf(1.6,2.0),0.15+R), sx=q(x-c.x), sy=q(y-c.y), b=rot2(a,-side*2.0,0.15+R+0.01);
+      if(sx+side*5>BOARD.W||sx+side*5<0) return false;
+      const ps=[P('seesaw',sx,sy,rot), P('ball',q(sx+b.x),q(sy+b.y))]; if(!fits(ps,tr,i)) return false;
+      L.push(...ps); active=L.length-1; dir=side; return 'swap'; },
+    domino(tr,i,t){ if(nBalls()>=3) return false; const x=t.x[i], y=t.y[i], d=Math.sign(t.vx[i])||dir;
+      const rot=-d*ri(1,2), a=ANG(rot), f=rf(0.15,0.3), sl=-d*1.5+d*f*3, c=rot2(a,sl,0.15+R), rx=x-c.x, ry=y-c.y;
+      const e=rot2(a,d*1.5,0.15), ex=rx+e.x, ey=ry+e.y-0.02;
+      const n=ri(3,4), s=rf(0.85,1.05), ps=[P('plankS',q(rx),q(ry),rot), P('plankL',q(ex+d*3.0),q(ey-0.15),0)];
+      for(let k=0;k<n;k++) ps.push(P('domino',q(ex+d*(1.0+k*s)),q(ey+0.9)));
+      ps.push(P('ball',q(ex+d*(1.0+(n-1)*s+1.15)),q(ey+R)));
+      if(!fits(ps,tr,i)) return false; L.push(...ps); active=L.length-1; dir=d; return 'swap'; }
+  };
+  const target=ri(CFG.RND_MODS[0],CFG.RND_MODS[1]); let mods=0;
+  const flightOf=tr=>{ const t=tr[active]; if(!t) return null; const fl=flightAfter(t,iLand); return fl?{t,fl}:null; };
+  // 宙をとぶ区間のうち、次のパーツを置ける点（下に向かっていて、着地点より じゅうぶん上）
+  const candOf=(c,ymin)=>{ const r=[]; if(!c) return r; const ye=c.t.y[c.fl[1]], lo=ye<1.2?ymin:Math.max(ymin,ye+2.2);
+    for(let i=c.fl[0]+3;i<=c.fl[1];i++) if(c.t.vy[i]<-1.5&&c.t.y[i]>lo) r.push(i); return r; };
+  // 重力を少しずらしても、玉が ほぼ同じ所を とぶか（たまたま うまくいった 置き方を はやめに はじく）
+  const steady=cc=>{ if(!CFG.RND_STEADY) return true; const t0=cur2.t; cc=cc.slice(0,Math.ceil(cc.length*0.5)); for(const e of (CFG.RND_STEADY>1?[CFG.RND_EPS,-CFG.RND_EPS]:[CFG.RND_EPS])){ const t=traceSim(C,L,active,iLand,e)[active]; if(!t) return false;
+      for(const i of cc){ if(i>=t.x.length) return false; if(Math.hypot(t.x[i]-t0.x[i],t.y[i]-t0.y[i])>0.4) return false; } } return true; };
+  let cur2=null;
+  let tr=traceSim(C,L,active,iLand), cur=flightOf(tr); if(!cur) return null;
+  for(let m=0;m<target;m++){
+    const cand=candOf(cur,3.2); if(!cand.length) break;
+    const types=['ramp','ramp','chime','chime','tramp','spring','seesaw','domino','domino'].filter(k=>!(k==='domino'||k==='seesaw')||!used.includes(k));
+    let ok=false;
+    for(let tryN=0;tryN<12&&!ok;tryN++){ const k=pick(types), t=cur.t, i=cand[Math.min(cand.length-1,Math.floor(Math.pow(rng(),1.6)*cand.length))];
+      const snap={n:L.length,active,iLand,dir,note};
+      const r=k==='ramp'?MOD.ramp(tr,i,t,pick(['plankS','plankL'])):k==='chime'?MOD.ramp(tr,i,t,'chime'):MOD[k](tr,i,t);
+      if(!r) continue;
+      iLand=r==='swap'?0:i;
+      // 置いたあと 走らせて、次に 受けとめられる「宙をとぶ区間」が できるかを たしかめる
+      const tr2=traceSim(C,L,active,iLand), c2=flightOf(tr2); cur2=c2;
+      const cc=c2?candOf(c2,m+1<target?3.2:2.2):[];
+      if(cc.length>=4&&steady(cc)){ tr=tr2; cur=c2; used.push(k); mods++; ok=true; }
+      else { L.length=snap.n; active=snap.active; iLand=snap.iLand; dir=snap.dir; note=snap.note; } }
+    if(!ok) break;
+  }
+  if(mods<CFG.RND_MODS[0]) return null;
+  // ---- ゴール ----
+  const t=cur.t, cand=candOf(cur,2.2).filter(i=>t.y[i]<13);
+  for(let k=0;k<12&&cand.length;k++){ const i=pick(cand), gy=Math.max(0.5,t.y[i]-1.8), g=P('goal',q(t.x[i]+Math.sign(t.vx[i])*rf(0,0.35)),q(gy));
+    if(t.y[i]-gy<1.75) continue;
+    if(fits([g],tr,i+3,0.06)){ L.push(g); return {layout:L, used}; } }
+  return null;
+}
+function winsAt(C,layout,eps){ const s=createBuildSim(C,layout,eps); while(s.status==='run') s.step(); return s.status==='win'; }
+function verifyLayout(C,layout){ const e=CFG.RND_EPS; return winsAt(C,layout,0)&&winsAt(C,layout,e)&&winsAt(C,layout,-e); }
+// A：つくって、たしかめる。だめなら やりなおし。RND_TRIES 回 か RND_TIME をこえたら null（→ B を使う）
+function genRandom(C,seed,now){ now=now||(()=>Date.now()); const t0=now(), rng=mulberry32(seed>>>0);
+  for(let n=1;n<=CFG.RND_TRIES;n++){ const g=genOnce(C,rng);
+    if(g&&verifyLayout(C,g.layout)) return {layout:g.layout, used:g.used, tries:n, ms:now()-t0};
+    if(now()-t0>CFG.RND_TIME) return {layout:null, tries:n, ms:now()-t0}; }
+  return {layout:null, tries:CFG.RND_TRIES, ms:now()-t0}; }
+
+// B：数値で たしかめた「みほん そうち」（重力 ±0.2〜0.8% でも ゴールする形だけ）
+const RANDOM_SETS = [
+  // pend>tramp>ramp>spring>domino
+  [P('pend',3,16.9,-5), P('ball',4,13.55), P('plankL',6.5,12.9), P('tramp',11.45,11.65), P('plankS',16.2,10.5,-1), P('spring',21.8,6.75,1), P('plankS',18.2,6.05,1), P('plankL',13.7,5.65), P('domino',15.7,6.7), P('domino',14.75,6.7), P('domino',13.8,6.7), P('domino',12.9,6.7), P('ball',11.75,6.3), P('goal',9.15,2.05)],
+  // slope>domino>chime>seesaw
+  [P('plankL',23.85,15.35,2), P('ball',25.5,17.1), P('plankS',18.2,11.2,1), P('plankL',13.7,10.8), P('domino',15.7,11.85), P('domino',14.65,11.85), P('domino',13.6,11.85), P('ball',12.45,11.45), P('chime',8.9,8.05,1,5), P('seesaw',6.7,4.75,-2), P('ball',8.75,4.3), P('goal',1.9,1.55)],
+  // pend>seesaw>spring>spring>chime
+  [P('pend',25.6,16.7,5), P('ball',24.6,13.35), P('plankS',23.6,12.7), P('seesaw',17.55,1.95,-2), P('ball',19.6,1.5), P('spring',12,5.65,-3,1), P('spring',22.15,7.05,2,1), P('chime',13.5,9.55,1,5), P('goal',11.45,7.6)],
+  // slope>domino>seesaw>ramp>spring>ramp
+  [P('plankL',4.7,14.9,-1), P('ball',2.65,16.15), P('plankS',9.75,12.95,-1), P('plankL',14.2,12.55), P('domino',12.2,13.6), P('domino',13.2,13.6), P('domino',14.15,13.6), P('domino',15.1,13.6), P('ball',16.25,13.2), P('seesaw',18.25,5.5,2), P('ball',16.2,5.05), P('plankS',22.9,9.7,1), P('spring',26.75,3.05,3), P('plankS',20.1,2.85,1), P('goal',17.4,0.85)],
+  // slope>seesaw>domino>tramp>ramp
+  [P('plankL',23.55,14.05,1), P('ball',25.6,15.3), P('seesaw',18.25,7.3,-2), P('ball',20.3,6.85), P('plankS',11.35,8.35,1), P('plankL',6.85,7.9), P('domino',8.85,8.95), P('domino',7.85,8.95), P('domino',6.8,8.95), P('domino',5.75,8.95), P('ball',4.6,8.55), P('tramp',1.95,2.65,-1), P('plankS',4.7,4.65,-1), P('goal',8.35,0.65)],
+  // slope>chime>domino>tramp>ramp>chime
+  [P('plankL',3.95,14.3,-2), P('ball',2.3,16.05), P('chime',9.1,11.05,1,4), P('plankS',12.15,9.45,-2), P('plankL',16.55,8.65), P('domino',14.55,9.7), P('domino',15.55,9.7), P('domino',16.5,9.7), P('ball',17.65,9.3), P('tramp',20.4,7.6,-1), P('plankS',23.75,6.6,1), P('chime',20.05,3.75,1,7), P('goal',16.6,0.65)],
+  // slope>tramp>chime>domino>tramp
+  [P('plankL',23.8,14,1), P('ball',25.85,15.25), P('tramp',19.4,12.2), P('chime',16.35,12.15,1,3), P('plankS',13.5,10.9,1), P('plankL',9,10.5), P('domino',11,11.55), P('domino',10,11.55), P('domino',9,11.55), P('domino',8.05,11.55), P('ball',6.9,11.15), P('tramp',4.55,7.55), P('goal',1.75,4.7)],
+  // pend>chime>chime>spring>seesaw
+  [P('pend',3.2,17,-5), P('ball',4.2,13.65), P('plankL',6.7,13), P('chime',15.25,4.55,-1,5), P('chime',19.9,3.15,1,1), P('spring',21.8,3.7,3,1), P('seesaw',10.75,2.4,-2), P('ball',12.8,1.95), P('goal',3.7,2.4)]
+];
+</script>
+<script type="module">
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
+
+// ===== 物理とレベル定義は <script id="sim-src"> にあります（ランダム生成の Worker と Node での検証でも、同じコードを使うため） =====
+const SIM=new Function('CANNON', document.getElementById('sim-src').textContent+
+  '\nreturn {CFG,LEVELS,createSim,PARTS,BOARD,NOTE_NAMES,ANG,settle,createBuildSim,P,BUILD_LEVELS,SAMPLE,FREE_EMPTY,RANDOM_SETS,genRandom,verifyLayout};')(CANNON);
+const {CFG,LEVELS,createSim,PARTS,BOARD,NOTE_NAMES,ANG,settle,createBuildSim,P,BUILD_LEVELS,SAMPLE,FREE_EMPTY,RANDOM_SETS,genRandom}=SIM;
 // ===== 見た目・操作の設定 =====
 // EL_* を大きくすると、カメラが上がって見おろす角度になります
 const VIEW = { NEAR_DIST: 23, EDIT_DIST: 26, AZ_TUT: 0.16, EL_TUT: 0.25, AZ_BUILD: 0.05, EL_BUILD: 0.2, SLOW: 0.3, REC_EVERY: 2 };
@@ -456,6 +658,11 @@ const CIRC = ['①','②','③','④','⑤'];
 const $ = id => document.getElementById(id);
 const clone = a => a.map(p=>Object.assign({},p));
 
+// ランダム出題（メニューの「ランダム」）。A＝その場で つくる（だめなら B）、B＝みほんから えらぶ
+const ALL_PARTS=['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'];
+BUILD_LEVELS.push(
+  { tab:'できたて', rnd:'A', mission:'コンピューターが つくった そうち。▶スタートで うごかそう', allow:ALL_PARTS, intro:[], parts:[] },
+  { tab:'みほん', rnd:'B', mission:'みほんの そうち。▶スタートで うごかそう', allow:ALL_PARTS, intro:[], parts:[] });
 const state = { mode:'edit', level:0, choice:[0,0,0,0], sel:-1, paused:true, slow:false, camFar:false, focus:0,
   frames:0, elapsed:0, status:'', failAt:0, viewT:0, rotate:false, cleared:BUILD_LEVELS.map(()=>false).concat(false), introSeen:{} };
 const layouts = BUILD_LEVELS.map(l=>clone(l.free?SAMPLE:l.parts));
@@ -582,7 +789,8 @@ function decorateBuild(D){
       const c=add(cylGeo(0.3,1,12),MAT.coil,0,0.2,0,0,true,g), plate=add(boxGeo(1.6,0.12,D*0.9),MAT.spring,0,0.26,0,0,true,g);
       for(let i=0;i<=L[d.pi].opt;i++) add(coneGeo(0.28,0.4,10),MAT.arrow,0,0.75+i*0.42,D/2-0.2,0,false,g);   // やじるしの数＝つよさ
       springsV.push({pi:d.pi,coil:c,plate}); }
-    else if(d.k==='flag') addFlag(d.x+1.3,d.y+1.15,d.x,d.y+0.8,3.2);
+    else if(d.k==='flag'){ addFlag(d.x+1.3,d.y+1.15,d.x,d.y+0.8,3.2);
+      if(d.red){ const s=label('あか','#e03131','#fff',1.1); s.position.set(d.x,d.y+2.3,D/2+0.3); group.add(s); } }   // 赤い玉だけが ゴールになる しるし
   }
   // 「ここ」の目印（自分の玉を まだ おいていない ときだけ）
   if(state.mode==='edit'&&BL().hint&&!L.some(p=>p.type==='ball'&&!p.lock)) for(const [hx,hy] of BL().hint){
@@ -639,9 +847,11 @@ function toEdit(){ state.status=''; state.failAt=0; setMode('edit'); buildWorld(
 function start(){ if(state.mode!=='edit') toEdit(); state.sel=-1; buildWorld(); audioOn(); record(); setMode('run'); refreshUI(); }
 function finish(){ state.status=sim.status; state.failAt=sim.failAt; setMode('done');
   const tr=$('time'); tr.max=rec.length-1; tr.value=rec.length-1;
-  const b=$('banner'), bb=$('bannerBtn'); b.style.display='flex'; b.className=sim.status;
+  const b=$('banner'), bb=$('bannerBtn'), bb2=$('bannerBtn2'); b.style.display='flex'; b.className=sim.status; bb2.style.display='none';
   if(sim.status==='win'){ state.cleared[state.level]=true;
-    if(BL()&&BL().free){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML='つづける'; bb.onclick=toEdit; }
+    if(BL()&&BL().rnd){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML='🎲 つぎの そうち'; bb.onclick=newRandom;
+      bb2.style.display='inline-block'; bb2.innerHTML='もういちど'; bb2.onclick=toEdit; }
+    else if(BL()&&BL().free){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML='つづける'; bb.onclick=toEdit; }
     else { const nx=BUILD_LEVELS[state.level]; $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML=nx&&nx.free?'じゆうに つくる':'つぎの レベルへ'; bb.onclick=()=>setLevel(state.level+1); }
   } else if(isTut()){ const i=sim.failAt-1; state.focus=Math.min(i,3);
     $('bannerTxt').innerHTML=`ざんねん！ ${CIRC[i]} ${GADGETS[i].name} で うまく いかなかったよ`; bb.innerHTML='なおす'; bb.onclick=toEdit;
@@ -649,9 +859,12 @@ function finish(){ state.status=sim.status; state.failAt=sim.failAt; setMode('do
   } else { $('bannerTxt').innerHTML='ざんねん！ ゴールに <ruby>入<rt>はい</rt></ruby>らなかったよ'; bb.innerHTML='なおす'; bb.onclick=toEdit; }
   refreshUI(); }
 function setChoice(g,i){ state.choice[g]=i; state.focus=g; toEdit(); }
-function setLevel(l){ state.level=l; state.sel=-1; state.focus=0; state.camFar=!isTut(); cam.az=isTut()?VIEW.AZ_TUT:VIEW.AZ_BUILD; cam.el=isTut()?VIEW.EL_TUT:VIEW.EL_BUILD;
+function setLevel(l){ state.level=l; state.sel=-1; state.focus=0; state.camFar=true;   // どのレベルも、さいしょは ぜんたいを 見る
+  cam.az=isTut()?VIEW.AZ_TUT:VIEW.AZ_BUILD; cam.el=isTut()?VIEW.EL_TUT:VIEW.EL_BUILD;
   $('cards').style.display=isTut()?'grid':'none'; $('palette').style.display=isTut()?'none':'flex';
-  setRotate(false); if(!isTut()) buildPalette(); toEdit(); resize(); if(!isTut()&&!state.introSeen[l]){ state.introSeen[l]=true; showIntro(); } }
+  $('busy').classList.remove('on'); RND.wait=null;
+  setRotate(false); if(!isTut()) buildPalette(); toEdit(); resize(); if(!isTut()&&!state.introSeen[l]){ state.introSeen[l]=true; showIntro(); }
+  if(BL()&&BL().rnd) newRandom(); }
 function advance(dt){
   state.frames++; state.elapsed+=dt;
   if(state.mode==='run'&&!state.paused){
@@ -693,7 +906,7 @@ function updateCamera(dt){
   sun.target.position.set(cam.x,cam.y,0); sun.position.set(cam.x+10,cam.y+26,24);
 }
 function resize(){ const w=window.innerWidth,h=window.innerHeight; renderer.setSize(w,h,false); camera.aspect=w/h;
-  freeTop=$('mission').getBoundingClientRect().bottom+4; freeBot=$('panel').offsetHeight;
+  freeTop=Math.max(54,$('mission').getBoundingClientRect().bottom+4); freeBot=$('panel').offsetHeight;
   // 見たい所が、上のバーと下のパネルの間のまん中に来るように、画面全体をずらす
   camera.setViewOffset(w,h,0,(freeBot-freeTop)/2,w,h); camera.updateProjectionMatrix();
   $('selbar').style.bottom=(freeBot+8)+'px'; refreshUI(); }
@@ -723,8 +936,9 @@ function buildPalette(){ const el=$('palette'); el.innerHTML='';
   BL().allow.forEach(t=>{ const b=document.createElement('button'); b.className='pbtn'+(fresh.has(t)?' new':''); b.dataset.t=t;
     b.innerHTML=`<svg viewBox="0 0 48 34">${ICON[t]}</svg>${PARTS[t].name}`; b.addEventListener('click',()=>{ audioOn(); addPart(t); }); el.appendChild(b); }); }
 // レベルに入ったとき、あたらしいパーツの説明を出す（ページを開いている間、1回だけ）
-function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.free?'じゆうに つくろう':'レベル'+(state.level+1)+'　あたらしい パーツ';
-  $('introList').innerHTML=L.free?`<li class="goal"><div>🧩 ぜんぶの パーツが つかえるよ。<br>まずは みほんを スタートしてみよう</div></li>`:
+function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.rnd?'ランダム そうち':L.free?'じゆうに つくろう':'レベル'+(state.level+1)+'　あたらしい パーツ';
+  $('introList').innerHTML=L.rnd?`<li><div style="font-size:30px">${L.rnd==='A'?'🎲':'📦'}</div><div>${L.rnd==='A'?'コンピューターが、その <ruby>場<rt>ば</rt></ruby>で そうちを つくるよ。<br>ちゃんと ゴールできるか、なんども ためしてから <ruby>出<rt>だ</rt></ruby>しているよ':'よういしてある みほんの そうちから、1つ <ruby>出<rt>で</rt></ruby>てくるよ'}</div></li>`+
+    `<li><div style="font-size:30px">🧩</div><div>パーツを うごかして、かえてみても いいよ。<br>「↩ もとに もどす」で もとどおり</div></li><li class="goal"><div>🎯 ▶スタートで うごかそう。ゴールしたら「つぎの そうち」</div></li>`:L.free?`<li class="goal"><div>🧩 ぜんぶの パーツが つかえるよ。<br>まずは みほんを スタートしてみよう</div></li>`:
     L.intro.map(r=>`<li><svg viewBox="0 0 48 34">${ICON[r[0]]}</svg><div><b>${r[1]}</b><br>${r[2]}</div></li>`).join('')+`<li class="goal"><div>🎯 ${L.mission}</div></li>`;
   $('intro').classList.add('open'); }
 $('intro').addEventListener('click',e=>{ if(e.target===$('intro')) $('intro').classList.remove('open'); });
@@ -735,10 +949,10 @@ function refreshUI(){
   const tut=isTut();
   document.querySelectorAll('.opts button').forEach(b=>b.classList.toggle('on',state.choice[+b.dataset.g]===+b.dataset.i));
   document.querySelectorAll('.card').forEach((c,i)=>c.classList.toggle('sel',state.mode==='edit'&&!state.camFar&&state.focus===i));
-  document.querySelectorAll('.lv').forEach(b=>{ const l=+b.dataset.lv; b.classList.toggle('on',l===state.level); const sm=window.innerWidth<520; b.textContent=(state.cleared[l]?'⭐':'')+(l===BUILD_LEVELS.length?'じゆう':(sm?'':'レベル')+(l+1)); });
   $('slowBtn').classList.toggle('on',state.slow); $('rotBtn').classList.toggle('on',state.rotate); $('camBtn').classList.toggle('on',tut?state.camFar:!state.camFar); $('camTxt').textContent=tut?'ぜんたい':'おいかける';
   $('mission').innerHTML=tut?TUT_MISSION:BL().mission; $('mission').style.display=state.mode==='done'?'none':'block';
-  const cb=$('clearBtn'); cb.style.display=tut?'none':''; if(!cb.classList.contains('warn')) cb.textContent=(BL()&&BL().free)?'🧹 ぜんぶ けす':'↩ さいしょから';
+  const cb=$('clearBtn'); cb.style.display=tut?'none':''; if(!cb.classList.contains('warn')) cb.textContent=(BL()&&BL().rnd)?'↩ もとに もどす':(BL()&&BL().free)?'🧹 ぜんぶ けす':'↩ さいしょから';
+  $('genInfo').style.display=(BL()&&BL().rnd)?'':'none';
   const sb=$('selbar'), p=!tut&&!state.rotate&&state.mode==='edit'&&state.sel>=0?layout()[state.sel]:null;
   sb.style.display=p?'flex':'none';
   if(p){ const sp=PARTS[p.type], canRot=!!(sp.rot||sp.lim); $('selName').textContent=sp.name;
@@ -768,7 +982,7 @@ function deletePart(){ const L=layout(), p=L[state.sel]; if(!p||p.lock) return;
   if(p.type==='goal'){ toast('ゴールは けせないよ'); return; }
   if(p.type==='ball'&&L.filter(q=>q.type==='ball').length<=1){ toast('<ruby>玉<rt>たま</rt></ruby>は 1こ いるよ'); return; }
   L.splice(state.sel,1); state.sel=-1; changed(); }
-function resetLayout(){ layouts[state.level-1]=clone(BL().free?FREE_EMPTY:BL().parts); state.sel=-1; toEdit(); }
+function resetLayout(){ layouts[state.level-1]=clone(BL().rnd?(BL().orig||[]):BL().free?FREE_EMPTY:BL().parts); state.sel=-1; toEdit(); }
 const ray=new THREE.Raycaster(), ndc=new THREE.Vector2(), wall=new THREE.Plane(new THREE.Vector3(0,0,1),0);
 function planePoint(e){ const r=canvas.getBoundingClientRect(); ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
   ray.setFromCamera(ndc,camera); return ray.ray.intersectPlane(wall,new THREE.Vector3()); }
@@ -802,13 +1016,59 @@ let clearT=0;
 $('clearBtn').addEventListener('click',()=>{ const b=$('clearBtn');   // 2回おして実行（まちがい防止）
   if(b.classList.contains('warn')){ clearTimeout(clearT); b.classList.remove('warn'); resetLayout(); }
   else { b.classList.add('warn'); b.textContent='もう1<ruby>回<rt>かい</rt></ruby> おすと けす'.replace(/<[^>]+>/g,''); clearT=setTimeout(()=>{ b.classList.remove('warn'); refreshUI(); },2500); } });
-document.querySelectorAll('.lv').forEach(b=>b.addEventListener('click',()=>{ audioOn(); $('intro').classList.remove('open'); $('help').classList.remove('open'); state.paused=false; setLevel(+b.dataset.lv); }));
+// ---------- メニュー画面 ----------
+const MENU_COL=['#ffe3a3','#ffd0c8','#c9f0d6','#cfe6ff','#e9d5ff','#ffd6ec'];
+function buildMenu(){ const lv=$('mLevels'), rn=$('mRandom'); lv.innerHTML=''; rn.innerHTML='';
+  const card=(l,html,col,el)=>{ const b=document.createElement('button'); b.className='mcard'; b.style.setProperty('--c',col);
+    b.innerHTML=(state.cleared[l]?'<span class="star">⭐</span>':'')+html; b.addEventListener('click',()=>chooseLevel(l)); el.appendChild(b); };
+  card(0,'<span class="mn">レベル1</span><small>れんしゅう<br>4つの しかけを えらぶ</small>',MENU_COL[0],lv);
+  BUILD_LEVELS.forEach((L,i)=>{ const l=i+1;
+    if(L.rnd==='A') card(l,'<span class="mn">🎲 できたて</span><small>コンピューターが<br>その<ruby>場<rt>ば</rt></ruby>で つくる</small>','#ffd6ec',rn);
+    else if(L.rnd==='B') card(l,'<span class="mn">📦 みほん</span><small>よういした そうちから<br>1つ <ruby>出<rt>で</rt></ruby>てくる</small>','#c5f6fa',rn);
+    else if(L.free) card(l,'<span class="mn">🧩 じゆう</span><small>ぜんぶの パーツで<br>すきに つくる</small>','#fff3b0',lv);
+    else card(l,`<span class="mn">レベル${l+1}</span><span class="ic">${L.intro.map(r=>`<svg viewBox="0 0 48 34">${ICON[r[0]]}</svg>`).join('')}</span><small>${L.intro.map(r=>r[1].split('・')[0]).join('・')}</small>`,MENU_COL[l%MENU_COL.length],lv); }); }
+function openMenu(){ if(state.mode==='run') toEdit(); buildMenu(); $('intro').classList.remove('open'); $('busy').classList.remove('on'); RND.wait=null;
+  $('menu').classList.add('open'); document.body.classList.add('inmenu'); state.paused=true; }
+function closeMenu(){ $('menu').classList.remove('open'); document.body.classList.remove('inmenu'); }
+function chooseLevel(l){ audioOn(); closeMenu(); $('help').classList.remove('open'); state.paused=false; setLevel(l); }
+$('menuBtn').addEventListener('click',()=>{ audioOn(); openMenu(); });
+$('mHelp').addEventListener('click',()=>{ audioOn(); $('help').classList.add('open'); });
+
+// ---------- ランダム出題（A は Worker で つくるので、つくっている間も 画面は止まらない） ----------
+const RND={ worker:undefined, pending:0, wait:null, next:null, lastB:-1, timer:0 };
+function pickB(){ let i; do{ i=Math.floor(Math.random()*RANDOM_SETS.length); }while(RANDOM_SETS.length>1&&i===RND.lastB); RND.lastB=i; return {layout:clone(RANDOM_SETS[i]), b:i}; }
+function makeWorker(){ try{
+    const src=`import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+const SIM=new Function('CANNON',${JSON.stringify($('sim-src').textContent+'\nreturn {genRandom};')})(CANNON);
+onmessage=e=>postMessage(Object.assign({id:e.data.id},SIM.genRandom(CANNON,e.data.seed,()=>performance.now())));`;
+    const w=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})),{type:'module'});
+    w.onmessage=e=>onGen(e.data);
+    w.onerror=()=>{ RND.worker=null; RND.pending=0; if(RND.wait) requestGen(); };   // Worker が使えないときは、画面の方で つくる
+    return w; }catch(e){ return null; } }
+function requestGen(){ if(RND.pending) return; const id=RND.pending=Date.now(), seed=(Math.random()*4294967296)>>>0;
+  if(RND.worker===undefined) RND.worker=makeWorker();
+  if(RND.worker) RND.worker.postMessage({id,seed});
+  else setTimeout(()=>onGen(Object.assign({id},genRandom(CANNON,seed,()=>performance.now()))),60); }
+function onGen(r){ if(r.id!==RND.pending) return; RND.pending=0; r.kind='A';
+  if(!r.layout){ const b=pickB(); r.layout=b.layout; r.fallback=true; }
+  if(RND.wait){ const cb=RND.wait; RND.wait=null; cb(r); requestGen(); }   // つぎの分を 先に つくっておく
+  else RND.next=r; }
+function newRandom(){ const L=BL(); if(!L||!L.rnd) return;
+  if(L.rnd==='B'){ applyRandom(Object.assign(pickB(),{kind:'B'})); return; }
+  if(RND.next){ const r=RND.next; RND.next=null; applyRandom(r); requestGen(); return; }
+  $('busy').classList.add('on');
+  RND.wait=r=>{ clearTimeout(RND.timer); $('busy').classList.remove('on'); applyRandom(r); };
+  clearTimeout(RND.timer); RND.timer=setTimeout(()=>{ if(RND.wait){ const cb=RND.wait; RND.wait=null; cb(Object.assign(pickB(),{kind:'A',fallback:true,timeout:true})); } },CFG.RND_WAIT);
+  requestGen(); }
+function applyRandom(r){ const L=BL(); if(!L||L.rnd!==r.kind) return;
+  L.orig=clone(r.layout); layouts[state.level-1]=clone(r.layout); state.sel=-1; toEdit();
+  RND.last=r; $('genInfo').textContent=r.kind==='B'?`みほん ${r.b+1}`:r.timeout?'できたて→みほん（じかんぎれ）':r.fallback?`できたて→みほん（${r.tries}かい・${(r.ms/1000).toFixed(2)}びょう）`:`できたて ${(r.ms/1000).toFixed(2)}びょう・${r.tries}かいめ`; }
 $('helpBtn').addEventListener('click',()=>{ $('help').classList.add('open'); state.paused=true; });
 $('startBtn').addEventListener('click',()=>{ audioOn(); $('help').classList.remove('open'); state.paused=false; });
 
 // ---------- iPad対策（拡大・スクロール防止） ----------
 document.addEventListener('gesturestart',e=>e.preventDefault());
-document.addEventListener('touchmove',e=>{ if(!e.target.closest('input[type=range],.box,#palette')) e.preventDefault(); },{passive:false});
+document.addEventListener('touchmove',e=>{ if(!e.target.closest('input[type=range],.box,#palette,.mwrap')) e.preventDefault(); },{passive:false});
 let lastTouch=0;
 document.addEventListener('touchend',e=>{ const n=Date.now(); if(n-lastTouch<300&&!e.target.closest('input[type=range]')) e.preventDefault(); lastTouch=n; },{passive:false});
 
@@ -824,17 +1084,20 @@ window.__game={ state, camera, cam, CFG, PARTS, BOARD, BUILD_LEVELS, SAMPLE, lay
     addPart, movePart, select(i){ state.sel=i; changed(); }, rotate:rotatePart, cycleOpt, deletePart, resetLayout,
     scrub(n){ $('time').value=n; },
     screenOf(x,y){ const v=new THREE.Vector3(x,y,0).project(camera); return {x:(v.x+1)/2*window.innerWidth,y:(1-v.y)/2*window.innerHeight}; },
-    simulate(a){ const s=createBuildSim(CANNON,a,0); while(s.status==='run') s.step(); return {status:s.status,t:s.t}; } } };
+    simulate(a,eps){ const s=createBuildSim(CANNON,a,eps||0); while(s.status==='run') s.step(); return {status:s.status,t:s.t}; },
+    openMenu, closeMenu, chooseLevel, newRandom, genA(seed){ return genRandom(CANNON,seed,()=>performance.now()); }, get rnd(){ return RND; }, RANDOM_SETS } };
 
 // ---------- 起動 ----------
 function boot(){
   TEX.flag=canvasTex(512,212,(g,w,h)=>{ g.fillStyle='#ffd54a'; g.fillRect(0,0,w,h); g.strokeStyle='#e8590c'; g.lineWidth=14; g.strokeRect(7,7,w-14,h-14);
     g.fillStyle='#333'; g.font='700 96px "BIZ UDPGothic",sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('ピタゴラ５',w/2,h/2+6); });
   MAT.flag=new THREE.MeshBasicMaterial({map:TEX.flag,side:THREE.DoubleSide});
-  buildCards(); setLevel(0);
+  buildCards(); buildMenu(); setLevel(0);
+  RND.worker=makeWorker(); if(RND.worker) requestGen();   // 「できたて」を すぐ出せるよう、うらで 1つ つくっておく
   cam.x=SEC_CENTER()[0][0]; cam.y=SEC_CENTER()[0][1]; cam.dist=VIEW.EDIT_DIST;
   let last=performance.now();
-  renderer.setAnimationLoop(now=>{ const dt=Math.min((now-last)/1000,1/30); last=now; advance(dt); renderer.render(scene,camera); });
+  const menuEl=$('menu');
+  renderer.setAnimationLoop(now=>{ const dt=Math.min((now-last)/1000,1/30); last=now; advance(dt); if(!menuEl.classList.contains('open')) renderer.render(scene,camera); });   // メニュー中は 描かない（電池の節約）
 }
 let booted=false; const once=()=>{ if(!booted){ booted=true; boot(); } };
 (document.fonts&&document.fonts.load?document.fonts.load('700 40px "BIZ UDPGothic"','ピタゴラ５１２３'):Promise.resolve()).then(once,once); setTimeout(once,1500);
