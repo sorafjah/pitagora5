@@ -39,6 +39,7 @@ body.inmenu .corner,body.inmenu #genInfo{display:none!important}
 #timeRow button.on{background:#7fd0ff}
 #rotBtn.on{background:#ffd54a!important}
 #clearBtn.warn{background:#ffb3a8}
+#hintBtn.on{background:#ffe066}
 #timeLbl{font-size:14px;font-weight:700;white-space:nowrap}
 #time{flex:1;min-width:60px;height:44px;margin:0;accent-color:#e8590c}
 #time:disabled{opacity:.3}
@@ -60,6 +61,8 @@ body.inmenu .corner,body.inmenu #genInfo{display:none!important}
 .pbtn:active{background:#d5e9f5}
 .pbtn{position:relative}
 .pbtn.new{background:#fff6cc}
+.pbtn.need{background:#ffe3d6}
+.pbtn.need::after{content:'つかう';position:absolute;top:2px;right:3px;background:#e8590c;color:#fff;font-size:10px;border-radius:6px;padding:1px 4px}
 .pbtn.new::after{content:'NEW';position:absolute;top:2px;right:3px;background:#e8590c;color:#fff;font-size:10px;border-radius:6px;padding:1px 4px}
 #introList{list-style:none;padding:0;margin:8px 0}
 #introList li{display:flex;gap:12px;align-items:center;background:#f1f5f8;border-radius:12px;padding:6px 10px;margin-bottom:6px;font-size:17px;line-height:1.8}
@@ -74,7 +77,7 @@ body.inmenu .corner,body.inmenu #genInfo{display:none!important}
 #selbar #delBtn{background:#ffd9d4}
 #selbar #optBtn{background:#d3f0dc}
 @media (max-width:900px){#cards{grid-template-columns:repeat(2,1fr)}#go{width:80px;font-size:16px}}
-@media (max-width:640px){#rotBtn,#slowBtn{font-size:12px!important;padding:0 6px!important}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}#menuBtn small{display:none}#mission{font-size:13px;max-width:calc(100vw - 120px)}}
+@media (max-width:640px){#rotBtn,#slowBtn,#hintBtn{font-size:12px!important;padding:0 6px!important}#timeLbl{display:none}#selbar span{display:none}.pbtn{width:74px}#menuBtn small{display:none}#mission{font-size:13px;max-width:calc(100vw - 120px)}}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:64px 12px 12px;z-index:10}
 .modal.open{display:flex}
 .box{background:#fff;border-radius:18px;padding:14px 18px;max-width:640px;width:100%;max-height:94vh;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -136,7 +139,7 @@ body.inmenu .corner,body.inmenu #genInfo{display:none!important}
 </script>
 </head>
 <body class="inmenu">
-<!-- build: 2026-11-15b -->
+<!-- build: 2026-11-16c -->
 <canvas id="c"></canvas>
 <button id="menuBtn" class="corner" aria-label="メニューへ もどる">☰<small>メニュー</small></button>
 <button id="helpBtn" class="corner" aria-label="あそびかた">？</button>
@@ -161,6 +164,7 @@ body.inmenu .corner,body.inmenu #genInfo{display:none!important}
     <button id="rotBtn">🔄 してん</button>
     <span id="timeLbl">⏪ <ruby>時間<rt>じかん</rt></ruby></span>
     <input id="time" type="range" min="0" max="0" value="0" step="1" disabled>
+    <button id="hintBtn">💡 ヒント</button>
     <button id="clearBtn"></button>
     <button id="camBtn">🔍 <span id="camTxt"></span></button>
   </div>
@@ -195,7 +199,7 @@ body.inmenu .corner,body.inmenu #genInfo{display:none!important}
   <ul id="introList"></ul>
   <button id="introClose">やってみる</button>
 </div></div>
-<div id="ver">v2026-11-15b</div>
+<div id="ver">v2026-11-16c</div>
 
 <script type="text/plain" id="sim-src">
 /*__SIM__*/
@@ -322,6 +326,8 @@ Object.assign(CFG, {
   PEND_L: 3,                   // ふりこの長さ
   SEESAW_LIM: 0.5, SEESAW_KICK: 1.0, SEESAW_VMAX: 18,             // シーソーがかたむく限界（ラジアン）
   SPIN_W: 2.5,                 // かざぐるまの回る速さ
+  BELT_V: [3, 6], BELT_ACC: 30,  // ベルトコンベア：はこぶ速さ（ゆっくり・はやい）と、玉が その速さに そろうまでの勢い
+  BELT_P: 1.2,                   // ベルトの歯の間隔（玉の直径 1 より すこし広く。玉は 歯と歯の あいだに おさまる）
   B_TIME_LIMIT: 20, GRASS: 0.992, MAX_PARTS: 40, GRID: 0.5
 });
 const BOARD = { W: 28, H: 18 };
@@ -338,6 +344,7 @@ const PARTS = {
   seesaw: { name:'シーソー', w:5, h:0.3, lim:2, surf:1 },
   spinner:{ name:'かざぐるま', w:4, h:4, opt:{ label:'むき', names:['みぎまわり','ひだりまわり'] } },
   chime:  { name:'てっきん', w:1.8, h:0.25, rot:24, surf:1, opt:{ label:'おと', names:NOTE_NAMES } },
+  belt:   { name:'ベルト コンベア', w:3.6, h:0.4, lim:3, surf:1, opt:{ label:'むき', names:['みぎ・ゆっくり','みぎ・はやい','ひだり・ゆっくり','ひだり・はやい'] } },
   goal:   { name:'ゴール', w:3.2, h:1.9, hy:0.5, max:1 }
 };
 const ANG = k => (k||0)*Math.PI/12;
@@ -361,9 +368,10 @@ function settle(layout){
 function createBuildSim(C, layout, eps){
   eps=eps||0; const R=CFG.BALL_R, D=CFG.BDEPTH, H=CFG.H;
   const world=new C.World(); world.gravity.set(0,-CFG.G*(1+eps),0); world.solver.iterations=20; world.allowSleep=false;
-  const M={}; ['ball','st','dom','pad','bar'].forEach(k=>M[k]=new C.Material(k));
+  const M={}; ['ball','st','dom','pad','bar','belt'].forEach(k=>M[k]=new C.Material(k));
   const cm=(a,b,f,r)=>world.addContactMaterial(new C.ContactMaterial(M[a],M[b],{friction:f,restitution:r}));
   cm('ball','st',0.5,0.1); cm('ball','dom',0,0.1); cm('dom','dom',0,0); cm('dom','st',0.6,0); cm('st','st',0.4,0);
+  cm('ball','belt',0,0.05); cm('dom','belt',0.8,0); cm('belt','st',0.4,0);   // ベルトの上の玉は、摩擦ではなく step() の中で 速さを そろえる
   cm('ball','pad',0.2,0.85); cm('ball','bar',0.4,0.3); cm('ball','ball',0.1,0.5); cm('dom','pad',0.5,0); cm('dom','bar',0.5,0);
   const parts=[], dyn=[], events=[], deco=[], fires=[], Z=new C.Vec3(0,0,1);
   function box(x,y,w,h,ang,o){ o=o||{};
@@ -373,7 +381,7 @@ function createBuildSim(C, layout, eps){
   box(BOARD.W/2,-0.5,BOARD.W+10,1,0,{look:'ground'});
   // 左右の見えない壁（ふりこの玉だけは通りぬける：壁にはりついて止まるのを防ぐ）
   box(-0.5,13,1,28,0,{look:'hidden'}).collisionFilterMask=1; box(BOARD.W+0.5,13,1,28,0,{look:'hidden'}).collisionFilterMask=1;
-  const seeKick=[], pos=settle(layout), balls=[], spinners=[], seesaws=[], pending=[], cool={}; let goal=null, slowMovers=false;
+  const seeKick=[], pos=settle(layout), balls=[], spinners=[], seesaws=[], belts=[], pending=[], cool={}; let goal=null, slowMovers=false;
   const s={ world, parts, dyn, events, deco, fires, t:0, steps:0, status:'run', failAt:0, ms:[0,0,0,0,0,0], fired:0, build:true, info:{} };
   layout.forEach((p,pi)=>{ const a=ANG(p.rot), x=pos[pi].x, y=pos[pi].y, o=p.opt||0, wood=p.lock?'locked':'wood';
     if(p.type==='ball'){ const b=new C.Body({mass:1,material:M.ball}); b.addShape(new C.Sphere(R)); b.position.set(x+eps*0.5,y,0); b.linearDamping=0.02; b.angularDamping=0.02;
@@ -401,6 +409,8 @@ function createBuildSim(C, layout, eps){
     else if(p.type==='spinner'){ const b=new C.Body({mass:0,type:C.Body.KINEMATIC,material:M.st}); b.addShape(new C.Box(new C.Vec3(2,0.15,D/2)));
       const q=new C.Quaternion(); q.setFromAxisAngle(Z,Math.PI/2); b.addShape(new C.Box(new C.Vec3(2,0.15,D/2)),new C.Vec3(0,0,0),q); b.position.set(x,y,0);
       world.addBody(b); dyn.push({body:b,kind:'spinner',pi}); spinners.push({b,w:o?CFG.SPIN_W:-CFG.SPIN_W}); deco.push({k:'hub',x,y,pi}); slowMovers=true; }
+    else if(p.type==='belt'){ const bw=PARTS.belt.w, bh=PARTS.belt.h, v=CFG.BELT_V[o%2]*(o>=2?-1:1);   // 見た目は decorateBuild で描く
+      box(x,y,bw,bh,a,{look:'hidden',mat:'belt'}); belts.push({x,y,a,w:bw,h:bh,v}); deco.push({k:'belt',x,y,a,pi,v,w:bw,h:bh}); }
     else if(p.type==='chime'){ const b=box(x,y,1.8,0.25,a,{look:'bar',mat:'bar',idx:o}); let last=-1;
       b.addEventListener('collide',e=>{ if(balls.includes(e.body)&&s.t-last>0.15){ last=s.t; events.push({k:'bar',i:o}); } }); }
     else if(p.type==='goal'){ box(x,y-0.15,2.9,0.3,0,{look:'goal'}); box(x-1.3,y+0.5,0.3,1.3,0,{look:'goal'}); box(x+1.3,y+0.5,0.3,1.3,0,{look:'goal'}); goal={x,y,lockOnly:o===1}; deco.push({k:'flag',x,y,red:o===1}); }
@@ -411,6 +421,16 @@ function createBuildSim(C, layout, eps){
   s.step=function(){
     if(s.status!=='run') return;
     for(const sp of spinners){ sp.b.quaternion.setFromAxisAngle(Z,sp.w*s.t); sp.b.angularVelocity.set(0,0,sp.w); }
+    // ベルトコンベア：上にのっている玉の、ベルトに そった速さを BELT_V に そろえる（摩擦ではなく 速さを 直接 そろえる チート）
+    // さらに 玉を「歯と歯の あいだ」の まん中へ よせる（見た目の 歯と 玉が かさならず、上り坂でも 歯で おしあげて いるように 見える）
+    const BP=CFG.BELT_P;
+    for(const bt of belts){ const c=Math.cos(bt.a), sn=Math.sin(bt.a), av=Math.abs(bt.v), sg=Math.sign(bt.v);
+      for(const b of balls){ const dx=b.position.x-bt.x, dy=b.position.y-bt.y, lx=dx*c+dy*sn, ly=-dx*sn+dy*c;
+        if(Math.abs(lx)<=bt.w/2+0.05&&ly>bt.h/2+R-0.08&&ly<bt.h/2+R+0.12){
+          const rel=lx-(-bt.w/2+(((bt.v*s.t)%BP)+BP)%BP+BP/2), err=-(rel-BP*Math.round(rel/BP));   // いちばん近い くぼみまでの ずれ
+          const f=Math.max(0.3,Math.min(1.6,1+err*sg*6/av)), want=bt.v*f;                     // うしろへは もどさない（おそくして くぼみを まつ）
+          const vt=b.velocity.x*c+b.velocity.y*sn, dv=Math.max(-CFG.BELT_ACC*H,Math.min(CFG.BELT_ACC*H,want-vt));
+          b.velocity.x+=dv*c; b.velocity.y+=dv*sn; b.angularVelocity.z=-(vt+dv)/R; } } }
     world.step(H); s.t+=H; s.steps++;
     // シーソーの はんたいがわに のっている玉を、決まった いきおいで とばす（ばねと同じく、毎回同じ とび方にするための チート）
     while(seeKick.length){ const k=seeKick.shift(), b=k.b; if(s.t-(b.lastKick||-1)<0.4) continue;
@@ -445,32 +465,31 @@ const BUILD_LEVELS = [
     intro:[ ['plankL','ながい いた・みじかい いた','<ruby>玉<rt>たま</rt></ruby>の とおりみちに なる。↺ ↻ で かたむけよう'],
             ['chime','てっきん','<ruby>玉<rt>たま</rt></ruby>が あたると <ruby>音<rt>おと</rt></ruby>が なる。いたの かわりにも なるよ'] ],
     parts:[ P('plankS',3.5,14.5,-1,0,1), P('ball',3,15.5,0,0,1), P('goal',24,0.5,0,0,1) ] },
-  { tab:'3', mission:'ばねや トランポリンで、<ruby>高<rt>たか</rt></ruby>い ゴールに とどけよう', allow:['plankL','plankS','spring','tramp'],
-    intro:[ ['spring','ばね','のった <ruby>玉<rt>たま</rt></ruby>を はじきとばす。↺ ↻ で とぶ <ruby>向<rt>む</rt></ruby>き、ボタンで つよさを かえる'],
-            ['tramp','トランポリン','<ruby>落<rt>お</rt></ruby>ちてきた <ruby>玉<rt>たま</rt></ruby>が はねかえる'] ],
-    parts:[ P('plankS',3.5,5.5,-1,0,1), P('ball',3,6.5,0,0,1), P('plankS',15,6.5,0,0,1), P('goal',15,7,0,0,1) ] },
-  { tab:'4', mission:'<ruby>止<rt>と</rt></ruby>まっている <ruby>玉<rt>たま</rt></ruby>を ふりこ や かざぐるまで うごかして、ゴールまで とどけよう', allow:['plankL','plankS','pend','spinner'],
-    intro:[ ['pend','ふりこ','スタートすると ふりおろして、ぶつかった ものを おす'],
-            ['spinner','かざぐるま','ずっと まわって、ふれた <ruby>玉<rt>たま</rt></ruby>を はじく'] ],
-    // 正解の例：ふりこ (4.5,17) かたむき-4 ＋ ながい いた (9.5,7) かたむき+2（玉を ひだりへ もどす）
-    parts:[ P('ball',5.5,13.7,0,0,1), P('plankL',5,13,0,0,1), P('goal',4,0.5,0,0,1) ] },
-  { tab:'5', mission:'じぶんの <ruby>玉<rt>たま</rt></ruby>で <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を おして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','domino','plankL','plankS'],
+  { tab:'3', mission:'じぶんの <ruby>玉<rt>たま</rt></ruby>で <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を おして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','domino','plankL','plankS'],
     hint:[[2.5,16]],
     intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける。さかの <ruby>上<rt>うえ</rt></ruby>に おいてみよう'],
             ['domino','ドミノ','たおれると となりも たおれる。<ruby>玉<rt>たま</rt></ruby>の かわりに おしたり、<ruby>音<rt>おと</rt></ruby>を たのしんだり できるよ'] ],
     // ゴール（opt 1）は 赤い玉が 入ったときだけ せいこう。正解の例：たま (2.5,16) ＋ ながい いた (8.5,11) -1 ・(14.5,10) 0 ＋ ながい いた (21.5,6.5) +2
     parts:[ P('ball',19,10.7,0,0,1), P('plankL',4.5,14,-2,0,1), P('plankS',20,10,0,0,1), P('goal',16,0.5,0,1,1) ] },
-  { tab:'6', mission:'シーソーで <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばして、ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','seesaw','plankL','plankS'],
+  { tab:'4', mission:'ベルトコンベアで <ruby>玉<rt>たま</rt></ruby>を たなの <ruby>上<rt>うえ</rt></ruby>まで はこんで、ゴールへ とどけよう', allow:['belt','plankL','plankS'],
+    intro:[ ['belt','ベルトコンベア','のった <ruby>玉<rt>たま</rt></ruby>を はこぶ。のぼり<ruby>坂<rt>ざか</rt></ruby>でも はこべるよ。ボタンで <ruby>向<rt>む</rt></ruby>きと はやさを かえる'] ],
+    // 正解の例：ベルト (7,4) かたむき+3 みぎ・はやい（棚まで 上げる）／ ベルト (13,1) かたむき+3（床から とばす）
+    parts:[ P('ball',2.5,4,0,0,1), P('plankS',3.5,3.2,-1,0,1), P('plankL',12,5.5,0,0,1), P('goal',16.5,0.5,0,0,1) ] },
+  { tab:'5', mission:'シーソーで <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばして、ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','seesaw','plankL','plankS'],
     intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が おちると、はんたいがわの <ruby>玉<rt>たま</rt></ruby>が とぶ。<ruby>高<rt>たか</rt></ruby>い ところから おとすほど、よく とぶよ'] ],
     // 正解の例：たま (10,12) ＋ ながい いた (18,3) 0（とんだ 赤い玉を うけて ゴールへ）
     parts:[ P('ball',6.1,3,0,0,1), P('seesaw',8,2,2,0,1), P('goal',23.5,0.5,0,1,1) ] },
-  { tab:'じゆう', free:true, mission:'すきな そうちを つくろう', allow:['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'],
+  { tab:'6', mission:'ばねや トランポリンで、<ruby>高<rt>たか</rt></ruby>い ゴールに とどけよう', allow:['plankL','plankS','spring','tramp'],
+    intro:[ ['spring','ばね','のった <ruby>玉<rt>たま</rt></ruby>を はじきとばす。↺ ↻ で とぶ <ruby>向<rt>む</rt></ruby>き、ボタンで つよさを かえる'],
+            ['tramp','トランポリン','<ruby>落<rt>お</rt></ruby>ちてきた <ruby>玉<rt>たま</rt></ruby>が はねかえる'] ],
+    parts:[ P('plankS',3.5,5.5,-1,0,1), P('ball',3,6.5,0,0,1), P('plankS',15,6.5,0,0,1), P('goal',15,7,0,0,1) ] },
+  { tab:'じゆう', free:true, mission:'すきな そうちを つくろう', allow:['ball','plankL','plankS','domino','belt','tramp','spring','seesaw','spinner','chime'],
     intro:[], parts:[] }
 ];
 
 
 // じゆうモードの最初に置いてある「みほん」
-const SAMPLE = [ P('pend',3,16.5,-4), P('plankL',6.5,12.5), P('plankL',12.5,12.5), P('ball',4,13.2),
+const SAMPLE = [ P('belt',2.5,14,0,1), P('ball',1.3,14.7), P('plankL',6.5,12.5), P('plankL',12.5,12.5),
   P('domino',9,13.7), P('domino',10,13.7), P('domino',11,13.7), P('domino',12,13.7), P('domino',13,13.7), P('ball',14.3,13.2),
   P('chime',17,10,-1,0), P('chime',19.5,8,-1,2), P('chime',22,6,-1,4), P('goal',26.5,1.5) ];
 const FREE_EMPTY = [ P('ball',3,15.5), P('plankS',3.5,14.5,-1), P('goal',24,0.5) ];
@@ -497,6 +516,7 @@ function partBoxes(p){ const a=ANG(p.rot), sp=PARTS[p.type];
     case 'spinner': return [{x:p.x,y:p.y,hw:2.2,hh:2.2,a:0}];
     case 'goal': return [{x:p.x,y:p.y+0.42,hw:1.45,hh:0.73,a:0}];
     case 'spring': return [{x:p.x,y:p.y,hw:0.8,hh:0.25,a}];
+    case 'belt': return [{x:p.x,y:p.y,hw:sp.w/2+0.1,hh:sp.h/2+0.2,a}];   // 歯の ぶんだけ 大きめ
     default: return [{x:p.x,y:p.y,hw:sp.w/2,hh:sp.h/2,a}];
   } }
 function boxDist(b,x,y){ const c=Math.cos(b.a), s=Math.sin(b.a), dx=x-b.x, dy=y-b.y, lx=dx*c+dy*s, ly=-dx*s+dy*c;
@@ -530,12 +550,13 @@ function genOnce(C,rng){
   let dir=rng()<0.5?1:-1, active, iLand=0, note=ri(0,4), used=[];
   const X=x=>dir>0?x:BOARD.W-x;   // 左右を反転できるように
   // ---- スタート ----
-  const st=pick(['slope','slope','pend']); used.push(st);
+  const st=pick(['slope','slope','belt']); used.push(st);
   if(st==='slope'){ const k=ri(1,2), rot=-dir*k, a=ANG(rot), cx=q(X(rf(3.6,5.2))), cy=q(rf(13.5,15.8));
     L.push(P('plankL',cx,cy,rot)); const top=rot2(a,-dir*2.3,0.15+R+0.02);
     L.push(P('ball',q(cx+top.x),q(cy+top.y))); active=1; }
-  else { const px=q(X(rf(2.2,3.5))), py=q(rf(15.6,17.2)), long=rng()<0.5;
-    L.push(P('pend',px,py,-dir*ri(4,6))); L.push(P('ball',q(px+dir*1.0),q(py-3.35))); L.push(P(long?'plankL':'plankS',q(px+dir*(long?3.5:2.0)),q(py-4.0),0)); active=1; }
+  else { const rot=dir*ri(0,1), a=ANG(rot), cx=q(X(rf(2.6,4.2))), cy=q(rf(13.5,15.5)), o=ri(0,1);   // ベルトに のった玉を はこんで、はしから おとす
+    L.push(P('belt',cx,cy,rot,dir>0?o:o+2)); const top=rot2(a,-dir*1.2,PARTS.belt.h/2+R+0.02);
+    L.push(P('ball',q(cx+top.x),q(cy+top.y))); active=1; }
   // ---- 置いてよいか（ほかの部品と重ならない・これまでの通り道をふさがない） ----
   function fits(news,tr,iC,clr){ clr=clr||0.12; const nb=news.flatMap(partBoxes), old=L.flatMap(partBoxes);
     for(const b of nb){ const c=Math.cos(b.a), s=Math.sin(b.a);
@@ -553,6 +574,10 @@ function genOnce(C,rng){
       const rot=-d*(type==='chime'?1:ri(1,2)), a=ANG(rot), th=PARTS[type].h, f=d===vd?rf(0.12,0.3):rf(0.62,0.8);
       const sl=-d*w/2+d*f*w, c=rot2(a,sl,th/2+R), opt=type==='chime'?(note=(note+ri(1,2))%8):0;
       const p=P(type,q(x-c.x),q(y-c.y),rot,opt); if(!fits([p],tr,i)) return false; L.push(p); dir=d; return true; },
+    belt(tr,i,t){ const x=t.x[i], y=t.y[i], vd=Math.sign(t.vx[i])||dir, w=PARTS.belt.w; let d=rng()<0.65?vd:-vd;
+      const ex=dd=>x+dd*w*0.85; if(ex(d)>BOARD.W-3.5||ex(d)<3.5) d=-d; if(ex(d)>BOARD.W-3.5||ex(d)<3.5) return false;
+      const rot=d*ri(0,2), a=ANG(rot), sl=-d*w/2+d*rf(0.15,0.35)*w, c=rot2(a,sl,PARTS.belt.h/2+R), o=ri(0,1);   // うしろの はしで 受けて、すすむ向きへ（のぼりも あり）
+      const p=P('belt',q(x-c.x),q(y-c.y),rot,d>0?o:o+2); if(!fits([p],tr,i)) return false; L.push(p); dir=d; return true; },
     tramp(tr,i,t){ if(t.vy[i]>-6) return false; const x=t.x[i], y=t.y[i]; let d=Math.sign(t.vx[i])||dir; if(x+d*5>BOARD.W-1||x+d*5<1) d=-d;
       const rot=-d*ri(0,1), a=ANG(rot), c=rot2(a,rf(-0.3,0.3),0.2+R); const p=P('tramp',q(x-c.x),q(y-c.y),rot);
       if(!fits([p],tr,i)) return false; L.push(p); dir=d; return true; },
@@ -585,7 +610,7 @@ function genOnce(C,rng){
   let tr=traceSim(C,L,active,iLand), cur=flightOf(tr); if(!cur) return null;
   for(let m=0;m<target;m++){
     const cand=candOf(cur,3.2); if(!cand.length) break;
-    const types=['ramp','ramp','chime','chime','tramp','spring','seesaw','domino','domino'].filter(k=>!(k==='domino'||k==='seesaw')||!used.includes(k));
+    const types=['ramp','ramp','chime','chime','belt','belt','tramp','spring','seesaw','domino','domino'].filter(k=>!(k==='domino'||k==='seesaw')||!used.includes(k));
     let ok=false;
     for(let tryN=0;tryN<12&&!ok;tryN++){ const k=pick(types), t=cur.t, i=cand[Math.min(cand.length-1,Math.floor(Math.pow(rng(),1.6)*cand.length))];
       const snap={n:L.length,active,iLand,dir,note};
@@ -609,31 +634,48 @@ function genOnce(C,rng){
 }
 function winsAt(C,layout,eps){ const s=createBuildSim(C,layout,eps); while(s.status==='run') s.step(); return s.status==='win'; }
 function verifyLayout(C,layout){ const e=CFG.RND_EPS; return winsAt(C,layout,0)&&winsAt(C,layout,e)&&winsAt(C,layout,-e); }
+// お題：できた そうちから、玉や ドミノを のせていない いた・てっきん・トランポリン・ベルトを 1〜2こ ぬく。
+// ぬいた パーツは 0.5 マス目に そろえても ゴールできるものだけ（生徒が 同じ 場所に おけるように）。ぬいたままでは ゴールしないことも たしかめる
+const PUZ_TYPES=['plankL','plankS','chime','tramp','belt'];
+function makePuzzle(C,layout,rng){
+  const R=CFG.BALL_R, g=v=>Math.round(v/CFG.GRID)*CFG.GRID;
+  const holds=p=>layout.some(o=>{ if(o.type!=='ball'&&o.type!=='domino') return false; const s=surfaceAt(p,o.x); if(!s) return false;
+    const off=o.type==='ball'?R/Math.cos(s.a):PARTS.domino.h/2; return Math.abs(o.y-(s.y+off))<0.25; });
+  const cand=[]; layout.forEach((p,i)=>{ if(PUZ_TYPES.includes(p.type)&&!holds(p)) cand.push(i); });
+  if(!cand.length) return null;
+  for(const n of (cand.length>=2&&rng()<0.5?[2,1]:[1])) for(let k=0;k<8;k++){
+    const pick=cand.slice().sort(()=>rng()-0.5).slice(0,n), ans=pick.map(i=>Object.assign({},layout[i],{x:g(layout[i].x),y:g(layout[i].y),lock:false}));
+    const full=layout.map((p,i)=>pick.includes(i)?ans[pick.indexOf(i)]:p);
+    if(!verifyLayout(C,full)) continue;
+    const puzzle=layout.filter((p,i)=>!pick.includes(i)).map(p=>Object.assign({},p,{lock:true}));
+    if(winsAt(C,puzzle,0)) continue;
+    return {puzzle, answer:ans}; }
+  return null; }
 // A：つくって、たしかめる。だめなら やりなおし。RND_TRIES 回 か RND_TIME をこえたら null（→ B を使う）
 function genRandom(C,seed,now){ now=now||(()=>Date.now()); const t0=now(), rng=mulberry32(seed>>>0);
   for(let n=1;n<=CFG.RND_TRIES;n++){ const g=genOnce(C,rng);
-    if(g&&verifyLayout(C,g.layout)) return {layout:g.layout, used:g.used, tries:n, ms:now()-t0};
+    if(g&&verifyLayout(C,g.layout)){ const pz=makePuzzle(C,g.layout,rng); if(pz) return {layout:g.layout, puzzle:pz.puzzle, answer:pz.answer, used:g.used, tries:n, ms:now()-t0}; }
     if(now()-t0>CFG.RND_TIME) return {layout:null, tries:n, ms:now()-t0}; }
   return {layout:null, tries:CFG.RND_TRIES, ms:now()-t0}; }
 
 // B：数値で たしかめた「みほん そうち」（重力 ±0.2〜0.8% でも ゴールする形だけ）
 const RANDOM_SETS = [
-  // pend>tramp>ramp>spring>domino
-  [P('pend',3,16.9,-5), P('ball',4,13.55), P('plankL',6.5,12.9), P('tramp',11.45,11.65), P('plankS',16.2,10.5,-1), P('spring',21.8,6.75,1), P('plankS',18.2,6.05,1), P('plankL',13.7,5.65), P('domino',15.7,6.7), P('domino',14.75,6.7), P('domino',13.8,6.7), P('domino',12.9,6.7), P('ball',11.75,6.3), P('goal',9.15,2.05)],
-  // slope>domino>chime>seesaw
-  [P('plankL',23.85,15.35,2), P('ball',25.5,17.1), P('plankS',18.2,11.2,1), P('plankL',13.7,10.8), P('domino',15.7,11.85), P('domino',14.65,11.85), P('domino',13.6,11.85), P('ball',12.45,11.45), P('chime',8.9,8.05,1,5), P('seesaw',6.7,4.75,-2), P('ball',8.75,4.3), P('goal',1.9,1.55)],
-  // pend>seesaw>spring>spring>chime
-  [P('pend',25.6,16.7,5), P('ball',24.6,13.35), P('plankS',23.6,12.7), P('seesaw',17.55,1.95,-2), P('ball',19.6,1.5), P('spring',12,5.65,-3,1), P('spring',22.15,7.05,2,1), P('chime',13.5,9.55,1,5), P('goal',11.45,7.6)],
-  // slope>domino>seesaw>ramp>spring>ramp
-  [P('plankL',4.7,14.9,-1), P('ball',2.65,16.15), P('plankS',9.75,12.95,-1), P('plankL',14.2,12.55), P('domino',12.2,13.6), P('domino',13.2,13.6), P('domino',14.15,13.6), P('domino',15.1,13.6), P('ball',16.25,13.2), P('seesaw',18.25,5.5,2), P('ball',16.2,5.05), P('plankS',22.9,9.7,1), P('spring',26.75,3.05,3), P('plankS',20.1,2.85,1), P('goal',17.4,0.85)],
-  // slope>seesaw>domino>tramp>ramp
-  [P('plankL',23.55,14.05,1), P('ball',25.6,15.3), P('seesaw',18.25,7.3,-2), P('ball',20.3,6.85), P('plankS',11.35,8.35,1), P('plankL',6.85,7.9), P('domino',8.85,8.95), P('domino',7.85,8.95), P('domino',6.8,8.95), P('domino',5.75,8.95), P('ball',4.6,8.55), P('tramp',1.95,2.65,-1), P('plankS',4.7,4.65,-1), P('goal',8.35,0.65)],
-  // slope>chime>domino>tramp>ramp>chime
-  [P('plankL',3.95,14.3,-2), P('ball',2.3,16.05), P('chime',9.1,11.05,1,4), P('plankS',12.15,9.45,-2), P('plankL',16.55,8.65), P('domino',14.55,9.7), P('domino',15.55,9.7), P('domino',16.5,9.7), P('ball',17.65,9.3), P('tramp',20.4,7.6,-1), P('plankS',23.75,6.6,1), P('chime',20.05,3.75,1,7), P('goal',16.6,0.65)],
-  // slope>tramp>chime>domino>tramp
-  [P('plankL',23.8,14,1), P('ball',25.85,15.25), P('tramp',19.4,12.2), P('chime',16.35,12.15,1,3), P('plankS',13.5,10.9,1), P('plankL',9,10.5), P('domino',11,11.55), P('domino',10,11.55), P('domino',9,11.55), P('domino',8.05,11.55), P('ball',6.9,11.15), P('tramp',4.55,7.55), P('goal',1.75,4.7)],
-  // pend>chime>chime>spring>seesaw
-  [P('pend',3.2,17,-5), P('ball',4.2,13.65), P('plankL',6.7,13), P('chime',15.25,4.55,-1,5), P('chime',19.9,3.15,1,1), P('spring',21.8,3.7,3,1), P('seesaw',10.75,2.4,-2), P('ball',12.8,1.95), P('goal',3.7,2.4)]
+  // slope>belt>domino>tramp>chime>spring
+  [P('plankL',3.95,14.25,-2), P('ball',2.3,16), P('belt',8.15,12.8,2), P('plankS',11.7,9.8,-2), P('plankL',16.05,9.05), P('domino',14.05,10.1), P('domino',15.05,10.1), P('domino',16.05,10.1), P('ball',17.2,9.7), P('tramp',20.3,5.05,-1), P('chime',23.95,6.25,1,2), P('spring',26.45,5.6,1,1), P('goal',22.3,9.35)],
+  // belt>spring>chime>spring>belt>tramp
+  [P('belt',25.2,14.5,-1,2), P('ball',26.55,14.9), P('spring',22,10,3,2), P('chime',6.1,13.2,-1,3), P('spring',3.85,13.1,-2), P('belt',9,11.25,-2,3), P('tramp',11.9,9.85), P('goal',21.2,3.35)],
+  // belt>ramp>domino>belt>seesaw>chime
+  [P('belt',3.3,15.35,1,1), P('ball',1.95,15.75), P('plankL',9.25,13.6,-1), P('plankS',15.3,11,-1), P('plankL',19.8,10.6), P('domino',17.8,11.65), P('domino',18.65,11.65), P('domino',19.5,11.65), P('domino',20.35,11.65), P('ball',21.5,11.25), P('belt',23.45,7.75,-1,3), P('seesaw',19.8,3.85,-2), P('ball',21.85,3.4), P('chime',15,3.05,1,4), P('goal',12.1,0.65)],
+  // slope>belt>seesaw>chime>spring
+  [P('plankL',24,13.75,1), P('ball',26.05,15), P('belt',18.3,12,-2,2), P('seesaw',15.9,4.95,-2), P('ball',17.95,4.5), P('chime',7.6,5.45,1,6), P('spring',4.8,4.7,-3), P('goal',11.7,2.75)],
+  // belt>spring>tramp>domino>ramp>ramp
+  [P('belt',2.75,13.8,1), P('ball',1.4,14.2), P('spring',5.55,11.45,-1), P('tramp',9.55,5.6), P('plankS',12.35,6.85,-1), P('plankL',16.8,6.45), P('domino',14.8,7.5), P('domino',15.8,7.5), P('domino',16.75,7.5), P('ball',17.9,7.1), P('plankS',21.2,4.65,-2), P('plankS',25.05,3.2,2), P('goal',22.9,0.9)],
+  // belt>domino>belt>chime>belt>chime
+  [P('belt',3.75,15.4,0,1), P('ball',2.55,16.1), P('plankS',8.6,13.45,-1), P('plankL',13.05,13), P('domino',11.05,14.05), P('domino',12.1,14.05), P('domino',13.15,14.05), P('domino',14.15,14.05), P('ball',15.3,13.65), P('belt',15.95,11.4,0,2), P('chime',12.85,9.9,1,7), P('belt',8.45,5.75,-1,2), P('chime',4.7,2.65,1,4), P('goal',1.8,0.8)],
+  // slope>seesaw>domino>spring>belt
+  [P('plankL',23.8,14.4,2), P('ball',25.45,16.15), P('seesaw',17.8,5,-2), P('ball',19.85,4.55), P('plankS',11.3,7.9,1), P('plankL',6.8,7.5), P('domino',8.8,8.55), P('domino',7.9,8.55), P('domino',6.95,8.55), P('ball',5.8,8.15), P('spring',1.8,2.65,-2), P('belt',7.9,2.75,1), P('goal',11,0.5)],
+  // slope>belt>spring>chime>ramp>chime>spring
+  [P('plankL',23.6,15.4,2), P('ball',25.25,17.15), P('belt',13.85,4.35,-2,2), P('spring',17.3,3.65,3,2), P('chime',5.45,8.35,-1,2), P('plankS',1.7,8.3,-1), P('chime',5.85,4.15,-1,4), P('spring',9.75,3.3,1,2), P('goal',3.65,10.55)]
 ];
 </script>
 <script type="module">
@@ -642,11 +684,12 @@ import * as CANNON from 'cannon-es';
 
 // ===== 物理とレベル定義は <script id="sim-src"> にあります（ランダム生成の Worker と Node での検証でも、同じコードを使うため） =====
 const SIM=new Function('CANNON', document.getElementById('sim-src').textContent+
-  '\nreturn {CFG,LEVELS,createSim,PARTS,BOARD,NOTE_NAMES,ANG,settle,createBuildSim,P,BUILD_LEVELS,SAMPLE,FREE_EMPTY,RANDOM_SETS,genRandom,verifyLayout};')(CANNON);
-const {CFG,LEVELS,createSim,PARTS,BOARD,NOTE_NAMES,ANG,settle,createBuildSim,P,BUILD_LEVELS,SAMPLE,FREE_EMPTY,RANDOM_SETS,genRandom}=SIM;
+  '\nreturn {CFG,LEVELS,createSim,PARTS,BOARD,NOTE_NAMES,ANG,settle,createBuildSim,P,BUILD_LEVELS,SAMPLE,FREE_EMPTY,RANDOM_SETS,genRandom,verifyLayout,makePuzzle};')(CANNON);
+const {CFG,LEVELS,createSim,PARTS,BOARD,NOTE_NAMES,ANG,settle,createBuildSim,P,BUILD_LEVELS,SAMPLE,FREE_EMPTY,RANDOM_SETS,genRandom,makePuzzle}=SIM;
 // ===== 見た目・操作の設定 =====
 // EL_* を大きくすると、カメラが上がって見おろす角度になります
-const VIEW = { NEAR_DIST: 23, EDIT_DIST: 26, AZ_TUT: 0.16, EL_TUT: 0.25, AZ_BUILD: 0.05, EL_BUILD: 0.2, SLOW: 0.3, REC_EVERY: 2 };
+// FOLLOW_W/H＝おいかける ときに 画面に 入れる 広さ、FOLLOW_V＝これより はやく 動いている ものに のりかえる（1秒あたり）
+const VIEW = { FOLLOW_W: 24, FOLLOW_H: 14, FOLLOW_V: 1.5, NEAR_DIST: 23, EDIT_DIST: 26, AZ_TUT: 0.16, EL_TUT: 0.25, AZ_BUILD: 0.05, EL_BUILD: 0.2, SLOW: 0.3, REC_EVERY: 2 };
 const GADGETS = [
   { name:'<ruby>坂<rt>さか</rt></ruby>', title:'<ruby>坂<rt>さか</rt></ruby>の <ruby>高<rt>たか</rt></ruby>さ', opts:['ひくい','ふつう','たかい'], num:true },
   { name:'ドミノ', title:'ドミノの ならべ<ruby>方<rt>かた</rt></ruby>', opts:['せまい','ふつう','ひろい'] },
@@ -659,11 +702,11 @@ const $ = id => document.getElementById(id);
 const clone = a => a.map(p=>Object.assign({},p));
 
 // ランダム出題（メニューの「ランダム」）。A＝その場で つくる（だめなら B）、B＝みほんから えらぶ
-const ALL_PARTS=['ball','plankL','plankS','domino','pend','tramp','spring','seesaw','spinner','chime'];
+const ALL_PARTS=['ball','plankL','plankS','domino','belt','tramp','spring','seesaw','spinner','chime'];   // ふりこは パレットから はずした（いまの レベル・みほんには まだ のこっている）
 BUILD_LEVELS.push(
-  { tab:'できたて', rnd:'A', mission:'コンピューターが つくった そうち。▶スタートで うごかそう', allow:ALL_PARTS, intro:[], parts:[] },
+  { tab:'できたて', rnd:'A', mission:'ぬけている パーツを おいて、ゴールまで とどけよう', allow:['plankL','plankS'], intro:[], parts:[] },
   { tab:'みほん', rnd:'B', mission:'みほんの そうち。▶スタートで うごかそう', allow:ALL_PARTS, intro:[], parts:[] });
-const state = { mode:'edit', level:0, choice:[0,0,0,0], sel:-1, paused:true, slow:false, camFar:false, focus:0,
+const state = { hint:false, mode:'edit', level:0, choice:[0,0,0,0], sel:-1, paused:true, slow:false, camFar:false, focus:0,
   frames:0, elapsed:0, status:'', failAt:0, viewT:0, rotate:false, cleared:BUILD_LEVELS.map(()=>false).concat(false), introSeen:{} };
 const layouts = BUILD_LEVELS.map(l=>clone(l.free?SAMPLE:l.parts));
 const isTut = () => state.level===0;
@@ -697,6 +740,8 @@ const TEX={
   coil:canvasTex(32,128,(g,w,h)=>{ g.fillStyle='#888'; g.fillRect(0,0,w,h); g.fillStyle='#ddd'; for(let i=0;i<8;i++) g.fillRect(0,i*16,w,7); })
 };
 TEX.board.wrapS=TEX.board.wrapT=TEX.floor.wrapS=TEX.floor.wrapT=THREE.RepeatWrapping;
+// ベルトコンベア：みどりの ベルトに、キャタピラのような 歯が ならんで うごく（歯の位置は 時間だけで きまる）
+const BELT_CH=0.2, BELT_CT=0.12;   // 歯の高さと厚さ（見た目だけ）
 const std=(o)=>new THREE.MeshStandardMaterial(Object.assign({roughness:0.75,metalness:0},o));
 const BAR_COL=[0xe03131,0xf08c00,0xf2c200,0x2e9e5b,0x1c7ed6], DOM_COL=[0xf08c00,0x2e9e5b,0x1c7ed6,0xae3ec9,0xe03131,0x0ca678];
 const BAR8=[0xe03131,0xf08c00,0xf2c200,0x2e9e5b,0x0ca6a6,0x1c7ed6,0xae3ec9,0xf06595];
@@ -710,9 +755,11 @@ const MAT={
   seesaw:std({color:0x0ca6a6,roughness:0.5}), spinner:std({color:0xae3ec9,roughness:0.5}), arrow:std({color:0xffe066,roughness:0.4}),
   board:std({map:TEX.board,roughness:1}), floor:std({map:TEX.floor,roughness:1}), pole:std({color:0x666666}),
   hint:new THREE.MeshBasicMaterial({color:0xe8590c,transparent:true,opacity:0.3}),
+  ghostHint:new THREE.MeshBasicMaterial({color:0xe8590c,transparent:true,opacity:0.35,depthWrite:false}),
   hi:new THREE.MeshBasicMaterial({color:0xffe600,transparent:true,opacity:0.35,depthTest:false}),
   conf:BAR_COL.map(c=>new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}))
 };
+MAT.belt=std({color:0x2f9e44,roughness:0.6}); MAT.beltCleat=std({color:0x1b6e2d,roughness:0.5}); MAT.beltSide=std({color:0x8ce99a,roughness:0.6});
 const labelCache={};
 function label(text,bg,fg,scale){ const key=text+bg; if(!labelCache[key]) labelCache[key]=new THREE.SpriteMaterial({map:canvasTex(128,128,(g)=>{
     g.fillStyle=bg; g.beginPath(); g.arc(64,64,58,0,7); g.fill(); g.fillStyle=fg; g.font=`700 ${text.length>1?52:78}px "BIZ UDPGothic",sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,64,70); }),depthTest:false});
@@ -725,11 +772,11 @@ const cylGeo=(r,h,n)=>{ const k='c'+[r,h,n].join(); return geoCache[k]||(geoCach
 const coneGeo=(r,h,n)=>{ const k='k'+[r,h,n].join(); return geoCache[k]||(geoCache[k]=new THREE.ConeGeometry(r,h,n)); };
 const planeGeo=(w,h)=>{ const k='p'+[w,h].join(); return geoCache[k]||(geoCache[k]=new THREE.PlaneGeometry(w,h)); };
 
-let group=null, dynMesh=[], rods=[], springsV=[], cradle=null, coil=null, flag=null, confetti=[], follow=-1;
+let group=null, dynMesh=[], rods=[], springsV=[], beltsV=[], cradle=null, coil=null, flag=null, confetti=[], follow=-1;
 function add(geo,mat,x,y,z,rz,sh,parent){ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z||0); if(rz) m.rotation.z=rz; m.castShadow=sh!==false; m.receiveShadow=true; (parent||group).add(m); return m; }
 function buildWorld(){
   if(group) scene.remove(group);
-  group=new THREE.Group(); scene.add(group); dynMesh=[]; confetti=[]; rods=[]; springsV=[]; cradle=coil=flag=null;
+  group=new THREE.Group(); scene.add(group); dynMesh=[]; confetti=[]; rods=[]; springsV=[]; beltsV=[]; cradle=coil=flag=null;
   const tut=isTut(), D=tut?CFG.DEPTH:CFG.BDEPTH;
   sim=tut?createSim(CANNON,0,state.choice,0):createBuildSim(CANNON,layout(),0);
   settled=tut?[]:settle(layout());
@@ -789,12 +836,23 @@ function decorateBuild(D){
       const c=add(cylGeo(0.3,1,12),MAT.coil,0,0.2,0,0,true,g), plate=add(boxGeo(1.6,0.12,D*0.9),MAT.spring,0,0.26,0,0,true,g);
       for(let i=0;i<=L[d.pi].opt;i++) add(coneGeo(0.28,0.4,10),MAT.arrow,0,0.75+i*0.42,D/2-0.2,0,false,g);   // やじるしの数＝つよさ
       springsV.push({pi:d.pi,coil:c,plate}); }
+    else if(d.k==='belt'){ const g=new THREE.Group(); g.position.set(d.x,d.y,0); g.rotation.z=d.a; group.add(g);
+      add(boxGeo(d.w,d.h,D),MAT.belt,0,0,0,0,true,g); add(boxGeo(d.w-0.3,d.h*0.5,0.06),MAT.beltSide,0,0,D/2+0.03,0,false,g);
+      for(const sx of [-1,1]) add(cylGeo(d.h/2,D+0.1,16),MAT.metal,sx*d.w/2,0,0,0,true,g).rotation.x=Math.PI/2;
+      const n=Math.ceil(d.w/CFG.BELT_P)+1, top=[], bot=[];
+      for(let k=0;k<n;k++){ top.push(add(boxGeo(BELT_CT,BELT_CH,D),MAT.beltCleat,0,d.h/2+BELT_CH/2,0,0,true,g)); bot.push(add(boxGeo(BELT_CT,BELT_CH,D),MAT.beltCleat,0,-d.h/2-BELT_CH/2,0,0,false,g)); }
+      const s=label((d.v>0?'▶':'◀').repeat(Math.abs(d.v)>CFG.BELT_V[0]?2:1),'#ffffff','#2f9e44',0.75); s.position.set(d.x,d.y,D/2+0.35); group.add(s);
+      beltsV.push({v:d.v,w:d.w,top,bot}); }
     else if(d.k==='flag'){ addFlag(d.x+1.3,d.y+1.15,d.x,d.y+0.8,3.2);
       if(d.red){ const s=label('あか','#e03131','#fff',1.1); s.position.set(d.x,d.y+2.3,D/2+0.3); group.add(s); } }   // 赤い玉だけが ゴールになる しるし
   }
   // 「ここ」の目印（自分の玉を まだ おいていない ときだけ）
   if(state.mode==='edit'&&BL().hint&&!L.some(p=>p.type==='ball'&&!p.lock)) for(const [hx,hy] of BL().hint){
     add(GEO_SPH,MAT.hint,hx,hy,0,0,false); const s=label('ここ','#e8590c','#fff',1.0); s.position.set(hx,hy+1.2,D/2+0.3); group.add(s); }
+  // できたて の ヒント：ぬいた パーツの 場所を うすく 出す（ベルトは 向きと はやさの しるしも）
+  if(state.mode==='edit'&&state.hint&&BL().answer) for(const p of BL().answer){ const sp=PARTS[p.type], a=ANG(p.rot);
+    add(boxGeo(sp.w,Math.max(sp.h,0.3),D),MAT.ghostHint,p.x,p.y,0,a,false).renderOrder=3;
+    const t=p.type==='belt'?((p.opt>=2?'◀':'▶').repeat(p.opt%2+1)):'？', s=label(t,'#e8590c','#fff',0.8); s.position.set(p.x-Math.sin(a)*0.8,p.y+Math.cos(a)*0.8,D/2+0.4); group.add(s); }
   // えらんでいるパーツを黄色く光らせる
   if(state.mode==='edit'&&state.sel>=0&&L[state.sel]){ const h=hitBox(state.sel); const m=add(boxGeo(h.w+0.5,h.h+0.5,0.05),MAT.hi,h.x,h.y,D/2+0.2,h.a,false); m.renderOrder=4; }
 }
@@ -814,6 +872,10 @@ function updateExtras(){
     const top=9.85+dy, len=top-8.1; coil.scale.y=len; coil.position.set(I.LX+0.75+dx*0.5,8.1+len/2,0); coil.rotation.z=-Math.atan2(dx,len); }
   for(const s of springsV){ let tf=-1; for(const f of sim.fires) if(f.pi===s.pi&&f.t<=T) tf=f.t;
     const e=0.9*kick(tf<0?-1:T-tf); s.plate.position.y=0.26+e; s.coil.scale.y=0.06+e; s.coil.position.y=0.2+(0.06+e)/2; }
+  // ベルトの歯：上の面は v の向きに、下の面は 反対向きに うごく（物理の「くぼみ」と おなじ 位置。時間だけで 決まるので まきもどしても 正しい）
+  for(const b of beltsV){ const P=CFG.BELT_P, ph=(((b.v*T)%P)+P)%P, lim=b.w/2-BELT_CT/2;
+    b.top.forEach((m,k)=>{ const x=-b.w/2+ph+k*P; m.visible=x<=lim; m.position.x=x; });
+    b.bot.forEach((m,k)=>{ const x=b.w/2-ph-k*P; m.visible=x>=-lim; m.position.x=x; }); }
   if(flag){ const won=tWin>=0; flag.visible=won; if(won){ const u=Math.min(1,tWin/0.9); flag.position.y=flag.userData.y0+(flag.userData.y1-flag.userData.y0)*(1-(1-u)*(1-u)); }
     for(const m of confetti){ const d=m.userData; m.visible=won&&tWin<4; if(m.visible){ m.position.set(d.x+d.vx*tWin,d.y+d.vy*tWin-6*tWin*tWin,d.vz*tWin+0.5); m.rotation.set(tWin*5+d.r,tWin*7+d.r,0); } } }
 }
@@ -849,7 +911,7 @@ function finish(){ state.status=sim.status; state.failAt=sim.failAt; setMode('do
   const tr=$('time'); tr.max=rec.length-1; tr.value=rec.length-1;
   const b=$('banner'), bb=$('bannerBtn'), bb2=$('bannerBtn2'); b.style.display='flex'; b.className=sim.status; bb2.style.display='none';
   if(sim.status==='win'){ state.cleared[state.level]=true;
-    if(BL()&&BL().rnd){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML='🎲 つぎの そうち'; bb.onclick=newRandom;
+    if(BL()&&BL().rnd){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML=BL().rnd==='A'?'🎲 つぎの おだい':'📦 つぎの そうち'; bb.onclick=newRandom;
       bb2.style.display='inline-block'; bb2.innerHTML='もういちど'; bb2.onclick=toEdit; }
     else if(BL()&&BL().free){ $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML='つづける'; bb.onclick=toEdit; }
     else { const nx=BUILD_LEVELS[state.level]; $('bannerTxt').innerHTML='🎉 だいせいこう！'; bb.innerHTML=nx&&nx.free?'じゆうに つくる':'つぎの レベルへ'; bb.onclick=()=>setLevel(state.level+1); }
@@ -884,8 +946,17 @@ const SEC_CENTER=()=>[[-9,18.5],[4.5,17.5],[16.5,12.5],[26.5,11.5],[sim.info.F+5
 let freeTop=60, freeBot=180;
 // w×h の範囲が、上のバーと下のパネルの間にちょうど入る距離
 function fitDist(w,h){ const t=Math.tan(camera.fov*Math.PI/360), H=window.innerHeight, fh=Math.max(120,H-freeTop-freeBot); return Math.max(w/(2*t*camera.aspect), h*H/(2*t*fh))*1.04; }
-function followTarget(){ // つくるモード：いちばん大きく動いた玉を追いかける
-  if(follow<0||state.frames%20===0){ let best=-1,bd=-1; const f0=rec[0]; sim.dyn.forEach((d,i)=>{ if(d.kind!=='ball') return; const p=dynMesh[i].position, dd=f0?Math.hypot(p.x-f0[i*4],p.y-f0[i*4+1]):0; if(dd>bd){ bd=dd; best=i; } }); follow=best; }
+// つくるモード：いま いちばん はやく 動いている 玉か ドミノを 追いかける（玉→ドミノ→べつの玉 と のりかえる）
+// 速さは 記録 rec[] から 出すので、まきもどし中も 同じように 動く。のりかえは 0.3秒に 1回まで（カメラが ゆれないように）
+let followHold=0;
+function followTarget(){
+  const fi=state.mode==='done'?+$('time').value:rec.length-1, f1=rec[fi], f0=rec[Math.max(0,fi-3)];
+  if(!f1) return null;
+  const sp=i=>{ const k=sim.dyn[i].kind; if(k!=='ball'&&k!=='domino') return -1; return Math.hypot(f1[i*4]-f0[i*4],f1[i*4+1]-f0[i*4+1])/(3*CFG.H*VIEW.REC_EVERY); };
+  let best=-1, bs=0; for(let i=0;i<sim.dyn.length;i++){ const v=sp(i); if(v>bs){ bs=v; best=i; } }
+  if(follow<0||!sim.dyn[follow]){ follow=best>=0&&bs>0?best:sim.dyn.findIndex(d=>d.kind==='ball'); followHold=state.frames; }
+  else if(best>=0&&best!==follow&&state.frames-followHold>18){ const cs=sp(follow);
+    if(bs>VIEW.FOLLOW_V&&(cs<VIEW.FOLLOW_V*0.5||bs>cs*2)){ follow=best; followHold=state.frames; } }
   return follow>=0?dynMesh[follow].position:null; }
 function updateCamera(dt){
   const I=sim.info, tut=isTut(); let tx,ty,td;
@@ -896,7 +967,7 @@ function updateCamera(dt){
       tx=p.x+1.5; ty=Math.max(p.y,3); if(recInfo.win>=0&&state.viewT>=recInfo.win){ tx=I.gx; ty=I.gy+2.2; } td=Math.max(VIEW.NEAR_DIST,fitDist(18,10)); }
   } else {
     const p=(!state.camFar&&state.mode!=='edit')?followTarget():null;
-    if(p){ tx=p.x; ty=Math.max(p.y,3); td=Math.max(VIEW.NEAR_DIST,fitDist(16,9)); }
+    if(p){ tx=p.x; ty=Math.max(p.y,VIEW.FOLLOW_H/2-1); td=fitDist(VIEW.FOLLOW_W,VIEW.FOLLOW_H); }
     else { tx=BOARD.W/2; ty=BOARD.H/2-0.2; td=fitDist(BOARD.W+2.5,BOARD.H+2.2); }
   }
   const k=1-Math.exp(-dt*(state.mode==='run'?5:4)); cam.x+=(tx-cam.x)*k; cam.y+=(ty-cam.y)*k; cam.dist+=(td-cam.dist)*k;
@@ -929,15 +1000,18 @@ const ICON={
   spring:'<path d="M14 30 l5 -4 l-10 -4 l10 -4 l-10 -4 l5 -3" fill="none" stroke="#888" stroke-width="3" transform="translate(10,0)"/><rect x="8" y="8" width="32" height="5" rx="2" fill="#f08c00"/><path d="M24 0 l6 6 h-12z" fill="#f2c200"/>',
   seesaw:'<line x1="4" y1="10" x2="44" y2="20" stroke="#0ca6a6" stroke-width="6" stroke-linecap="round"/><path d="M24 16 l8 14 h-16z" fill="#555c66"/>',
   spinner:'<line x1="6" y1="17" x2="42" y2="17" stroke="#ae3ec9" stroke-width="6" stroke-linecap="round"/><line x1="24" y1="1" x2="24" y2="33" stroke="#ae3ec9" stroke-width="6" stroke-linecap="round"/><circle cx="24" cy="17" r="4" fill="#555"/>',
-  chime:'<rect x="6" y="14" width="26" height="7" rx="3" fill="#1c7ed6"/><text x="35" y="16" font-size="16" fill="#333">♪</text>'
+  chime:'<rect x="6" y="14" width="26" height="7" rx="3" fill="#1c7ed6"/><text x="35" y="16" font-size="16" fill="#333">♪</text>',
+  belt:'<rect x="5" y="13" width="38" height="10" rx="5" fill="#2f9e44"/><g fill="#1b6e2d"><rect x="11" y="8" width="3" height="5"/><rect x="20" y="8" width="3" height="5"/><rect x="29" y="8" width="3" height="5"/><rect x="15" y="23" width="3" height="5"/><rect x="25" y="23" width="3" height="5"/><rect x="34" y="23" width="3" height="5"/></g><circle cx="10" cy="18" r="3" fill="#aaa"/><circle cx="38" cy="18" r="3" fill="#aaa"/><path d="M21 15 l5 3 l-5 3z" fill="#fff"/>'
 };
 function buildPalette(){ const el=$('palette'); el.innerHTML='';
   const fresh=new Set(); BL().intro.forEach(r=>{ fresh.add(r[0]); if(r[0]==='plankL') fresh.add('plankS'); });
-  BL().allow.forEach(t=>{ const b=document.createElement('button'); b.className='pbtn'+(fresh.has(t)?' new':''); b.dataset.t=t;
+  BL().allow.forEach(t=>{ const b=document.createElement('button'); b.className='pbtn'+(fresh.has(t)?' new':'')+(BL().need&&BL().need.has(t)?' need':''); b.dataset.t=t;
     b.innerHTML=`<svg viewBox="0 0 48 34">${ICON[t]}</svg>${PARTS[t].name}`; b.addEventListener('click',()=>{ audioOn(); addPart(t); }); el.appendChild(b); }); }
 // レベルに入ったとき、あたらしいパーツの説明を出す（ページを開いている間、1回だけ）
-function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.rnd?'ランダム そうち':L.free?'じゆうに つくろう':'レベル'+(state.level+1)+'　あたらしい パーツ';
-  $('introList').innerHTML=L.rnd?`<li><div style="font-size:30px">${L.rnd==='A'?'🎲':'📦'}</div><div>${L.rnd==='A'?'コンピューターが、その <ruby>場<rt>ば</rt></ruby>で そうちを つくるよ。<br>ちゃんと ゴールできるか、なんども ためしてから <ruby>出<rt>だ</rt></ruby>しているよ':'よういしてある みほんの そうちから、1つ <ruby>出<rt>で</rt></ruby>てくるよ'}</div></li>`+
+function showIntro(){ const L=BL(); $('introTitle').innerHTML=L.rnd==='A'?'できたての おだい':L.rnd?'みほんの そうち':L.free?'じゆうに つくろう':'レベル'+(state.level+1)+'　あたらしい パーツ';
+  $('introList').innerHTML=L.rnd==='A'?`<li><div style="font-size:30px">🎲</div><div>コンピューターが そうちを つくって、パーツを いくつか ぬいたよ。<br>ぬけた ところに、<ruby>下<rt>した</rt></ruby>の パーツを おこう</div></li>`+
+    `<li><div style="font-size:30px">💡</div><div>こまったら「ヒント」。ぬけた <ruby>場所<rt>ばしょ</rt></ruby>が うすく <ruby>見<rt>み</rt></ruby>えるよ</div></li><li class="goal"><div>🎯 ゴールしたら「つぎの おだい」</div></li>`:
+    L.rnd?`<li><div style="font-size:30px">📦</div><div>よういしてある みほんの そうちから、1つ <ruby>出<rt>で</rt></ruby>てくるよ</div></li>`+
     `<li><div style="font-size:30px">🧩</div><div>パーツを うごかして、かえてみても いいよ。<br>「↩ もとに もどす」で もとどおり</div></li><li class="goal"><div>🎯 ▶スタートで うごかそう。ゴールしたら「つぎの そうち」</div></li>`:L.free?`<li class="goal"><div>🧩 ぜんぶの パーツが つかえるよ。<br>まずは みほんを スタートしてみよう</div></li>`:
     L.intro.map(r=>`<li><svg viewBox="0 0 48 34">${ICON[r[0]]}</svg><div><b>${r[1]}</b><br>${r[2]}</div></li>`).join('')+`<li class="goal"><div>🎯 ${L.mission}</div></li>`;
   $('intro').classList.add('open'); }
@@ -953,6 +1027,7 @@ function refreshUI(){
   $('mission').innerHTML=tut?TUT_MISSION:BL().mission; $('mission').style.display=state.mode==='done'?'none':'block';
   const cb=$('clearBtn'); cb.style.display=tut?'none':''; if(!cb.classList.contains('warn')) cb.textContent=(BL()&&BL().rnd)?'↩ もとに もどす':(BL()&&BL().free)?'🧹 ぜんぶ けす':'↩ さいしょから';
   $('genInfo').style.display=(BL()&&BL().rnd)?'':'none';
+  $('hintBtn').style.display=(BL()&&BL().rnd==='A')?'':'none'; $('hintBtn').classList.toggle('on',state.hint);
   const sb=$('selbar'), p=!tut&&!state.rotate&&state.mode==='edit'&&state.sel>=0?layout()[state.sel]:null;
   sb.style.display=p?'flex':'none';
   if(p){ const sp=PARTS[p.type], canRot=!!(sp.rot||sp.lim); $('selName').textContent=sp.name;
@@ -970,6 +1045,7 @@ function addPart(type){
   let x=BOARD.W/2, y=12; if(type==='ball'&&BL().hint&&!L.some(p=>p.type==='ball'&&!p.lock)){ x=BL().hint[0][0]; y=BL().hint[0][1]; } for(let i=0;i<40&&L.some(p=>Math.abs(p.x-x)<1.2&&Math.abs(p.y-y)<0.8);i++){ x+=2; if(x>BOARD.W-3){ x=4; y-=1.5; } }
   L.push(P(type,x,y,0,sp.opt0||0)); state.sel=L.length-1; changed();
   if(type==='spring') toast('↺ ↻ で、とぶ <ruby>向<rt>む</rt></ruby>きを かえられるよ');
+  if(type==='belt') toast('ボタンで、<ruby>玉<rt>たま</rt></ruby>を はこぶ <ruby>向<rt>む</rt></ruby>きと はやさを かえられるよ');
   return state.sel; }
 function movePart(i,x,y){ const p=layout()[i]; if(!p||p.lock) return;
   x=Math.max(0.5,Math.min(BOARD.W-0.5,snap(x))); y=Math.max(0.5,Math.min(BOARD.H-0.5,snap(y)));
@@ -1004,6 +1080,7 @@ canvas.addEventListener('pointermove',e=>{ if(!drag) return;
 ['pointerup','pointercancel'].forEach(n=>canvas.addEventListener(n,()=>drag=null));
 
 $('go').addEventListener('click',()=>{ audioOn(); if(state.mode==='edit') start(); else toEdit(); });
+$('hintBtn').addEventListener('click',()=>{ state.hint=!state.hint; if(state.mode!=='edit') toEdit(); else changed(); });
 $('slowBtn').addEventListener('click',()=>{ state.slow=!state.slow; refreshUI(); });
 $('camBtn').addEventListener('click',()=>{ state.camFar=!state.camFar; refreshUI(); });
 // 「してん」ボタン：入れると画面をなぞって見る向きをかえられる。切ると元の向きにもどる（その間はパーツを動かせない）
@@ -1023,7 +1100,7 @@ function buildMenu(){ const lv=$('mLevels'), rn=$('mRandom'); lv.innerHTML=''; r
     b.innerHTML=(state.cleared[l]?'<span class="star">⭐</span>':'')+html; b.addEventListener('click',()=>chooseLevel(l)); el.appendChild(b); };
   card(0,'<span class="mn">レベル1</span><small>れんしゅう<br>4つの しかけを えらぶ</small>',MENU_COL[0],lv);
   BUILD_LEVELS.forEach((L,i)=>{ const l=i+1;
-    if(L.rnd==='A') card(l,'<span class="mn">🎲 できたて</span><small>コンピューターが<br>その<ruby>場<rt>ば</rt></ruby>で つくる</small>','#ffd6ec',rn);
+    if(L.rnd==='A') card(l,'<span class="mn">🎲 できたて</span><small>コンピューターが<br>おだいを つくる</small>','#ffd6ec',rn);
     else if(L.rnd==='B') card(l,'<span class="mn">📦 みほん</span><small>よういした そうちから<br>1つ <ruby>出<rt>で</rt></ruby>てくる</small>','#c5f6fa',rn);
     else if(L.free) card(l,'<span class="mn">🧩 じゆう</span><small>ぜんぶの パーツで<br>すきに つくる</small>','#fff3b0',lv);
     else card(l,`<span class="mn">レベル${l+1}</span><span class="ic">${L.intro.map(r=>`<svg viewBox="0 0 48 34">${ICON[r[0]]}</svg>`).join('')}</span><small>${L.intro.map(r=>r[1].split('・')[0]).join('・')}</small>`,MENU_COL[l%MENU_COL.length],lv); }); }
@@ -1061,7 +1138,15 @@ function newRandom(){ const L=BL(); if(!L||!L.rnd) return;
   clearTimeout(RND.timer); RND.timer=setTimeout(()=>{ if(RND.wait){ const cb=RND.wait; RND.wait=null; cb(Object.assign(pickB(),{kind:'A',fallback:true,timeout:true})); } },CFG.RND_WAIT);
   requestGen(); }
 function applyRandom(r){ const L=BL(); if(!L||L.rnd!==r.kind) return;
-  L.orig=clone(r.layout); layouts[state.level-1]=clone(r.layout); state.sel=-1; toEdit();
+  let lay=r.layout;
+  if(r.kind==='A'){   // できたて＝お題：ぬいた パーツを 生徒が おく
+    if(!r.puzzle){ const pz=makePuzzle(CANNON,r.layout,Math.random); if(pz){ r.puzzle=pz.puzzle; r.answer=pz.answer; } }
+    if(r.puzzle){ lay=r.puzzle; L.answer=r.answer; const ty=[...new Set(r.answer.map(p=>p.type))];
+      L.allow=['plankL','plankS'].concat(ty.filter(t=>!t.startsWith('plank'))); L.need=new Set(ty);
+      L.mission=`あと ${r.answer.length}こ パーツを おいて、ゴールまで とどけよう`; }
+    else { L.answer=null; L.allow=ALL_PARTS; L.need=null; L.mission='▶スタートで うごかそう'; }
+    state.hint=false; buildPalette(); }
+  L.orig=clone(lay); layouts[state.level-1]=clone(lay); state.sel=-1; toEdit();
   RND.last=r; $('genInfo').textContent=r.kind==='B'?`みほん ${r.b+1}`:r.timeout?'できたて→みほん（じかんぎれ）':r.fallback?`できたて→みほん（${r.tries}かい・${(r.ms/1000).toFixed(2)}びょう）`:`できたて ${(r.ms/1000).toFixed(2)}びょう・${r.tries}かいめ`; }
 $('helpBtn').addEventListener('click',()=>{ $('help').classList.add('open'); state.paused=true; });
 $('startBtn').addEventListener('click',()=>{ audioOn(); $('help').classList.remove('open'); state.paused=false; });
