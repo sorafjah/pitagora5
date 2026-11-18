@@ -199,7 +199,7 @@ body.present #row{justify-content:center}
 </script>
 </head>
 <body class="inmenu">
-<!-- build: 2026-11-17 -->
+<!-- build: 2026-11-18 -->
 <canvas id="c"></canvas>
 <button id="menuBtn" class="corner" aria-label="メニューへ もどる">☰<small>メニュー</small></button>
 <button id="helpBtn" class="corner" aria-label="あそびかた">？</button>
@@ -312,7 +312,7 @@ body.present #row{justify-content:center}
     document.getElementById('oldMsg').style.display='flex'; }, ok?15000:2000);
 })();
 </script>
-<div id="ver">v2026-11-17</div>
+<div id="ver">v2026-11-18</div>
 
 <script type="text/plain" id="sim-src">
 /*__SIM__*/
@@ -582,12 +582,12 @@ const BUILD_LEVELS = [
     hint:[[2.5,16]],
     intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける。さかの <ruby>上<rt>うえ</rt></ruby>に おいてみよう'],
             ['domino','ドミノ','たおれると となりも たおれる。<ruby>玉<rt>たま</rt></ruby>の かわりに おしたり、<ruby>音<rt>おと</rt></ruby>を たのしんだり できるよ'] ],
-    // ゴール（opt 1）は 赤い玉が 入ったときだけ せいこう。正解の例：たま (2.5,16) ＋ ながい いた (8.5,11) -1 ・(14.5,10) 0 ＋ ながい いた (21.5,6.5) +2
-    parts:[ P('ball',19,10.7,0,0,1), P('plankL',4.5,14,-2,0,1), P('plankS',20,10,0,0,1), P('goal',16,0.5,0,1,1) ] },
+    // ゴール（opt 1）は 赤い玉が 入ったときだけ せいこう。正解の例：たま (2.5,16) ＋ ながい いた (8.5,11) -1 ・(14.5,10) 0 ＋ ながい いた (21.5,4) +1（赤い たまの いたを 1 ひくくした：2026-11-18）
+    parts:[ P('ball',19,9.7,0,0,1), P('plankL',4.5,14,-2,0,1), P('plankS',20,9,0,0,1), P('goal',16,0.5,0,1,1) ] },
   { tab:'4', mission:'ベルトコンベアで <ruby>玉<rt>たま</rt></ruby>を たなの <ruby>上<rt>うえ</rt></ruby>まで はこんで、ゴールへ とどけよう', allow:['belt','plankL','plankS'],
     intro:[ ['belt','ベルトコンベア','のった <ruby>玉<rt>たま</rt></ruby>を はこぶ。のぼり<ruby>坂<rt>ざか</rt></ruby>でも はこべるよ。ボタンで <ruby>向<rt>む</rt></ruby>きと はやさを かえる'] ],
-    // 正解の例：ベルト (7,4) かたむき+3 みぎ・はやい（棚まで 上げる）／ ベルト (13,1) かたむき+3（床から とばす）
-    parts:[ P('ball',2.5,4,0,0,1), P('plankS',3.5,3.2,-1,0,1), P('plankL',12,5.5,0,0,1), P('goal',16.5,0.5,0,0,1) ] },
+    // 正解の例：ベルト (7,4) かたむき+3 みぎ・はやい（棚まで 上げる）／ ベルト (13,1) かたむき+3（床から とばす）。棚(板)を (13,6.5) に 右上へ ずらして、ベルト1つでは とどきにくく した（2026-11-18）
+    parts:[ P('ball',2.5,4,0,0,1), P('plankS',3.5,3.2,-1,0,1), P('plankL',13,6.5,0,0,1), P('goal',16.5,0.5,0,0,1) ] },
   { tab:'5', mission:'シーソーで <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばして、ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','seesaw','plankL','plankS'],
     intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が おちると、はんたいがわの <ruby>玉<rt>たま</rt></ruby>が とぶ。<ruby>高<rt>たか</rt></ruby>い ところから おとすほど、よく とぶよ'] ],
     // 正解の例：たま (10,12) ＋ ながい いた (18,3) 0（とんだ 赤い玉を うけて ゴールへ）
