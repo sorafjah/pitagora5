@@ -186,6 +186,25 @@ body.present #row{justify-content:center}
 #qrBigImg svg{width:100%;height:100%;display:block}
 #qrBig p{margin:0;font-size:24px;font-weight:700;line-height:1.8}
 #qrBigClose{background:#e8eef2;font-size:18px;padding:0 22px;min-height:48px}
+/* 名前用の がめんキーボード */
+#clsKbBox{margin-top:10px;background:#fff8;border-radius:18px;padding:10px}
+#kbTabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+#kbTabs button{background:#e8eef2;font-size:17px;padding:0 14px;min-height:46px}
+#kbTabs button.on{background:#7fd0ff}
+#kbKeys{display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,52px);grid-auto-columns:minmax(36px,1fr);gap:6px}
+#kbEx{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.kbk{min-width:0;min-height:48px;background:#fff;font-size:22px;border-radius:10px;box-shadow:0 3px 0 #0002;padding:0}
+.kbk:active{background:#d5e9f5;transform:translateY(2px);box-shadow:0 1px 0 #0002}
+.kbk.sp{visibility:hidden}
+#kbEx .kbk{flex:1;min-width:52px}
+#kbEx .kbk.del{background:#ffd9d4}
+#kbHint{font-size:14px;line-height:1.7;text-align:center;margin:6px 0 0;color:#555}
+#tsList{position:fixed;inset:0;z-index:36;background:#0007;display:none;align-items:center;justify-content:center;padding:12px}
+#tsList.open{display:flex}
+#tsList .box{max-width:520px}
+#tsList .row{display:flex;gap:8px;margin-bottom:6px}
+#tsList .row button{flex:1;background:#f1f5f8;font-size:18px;text-align:left;padding:0 12px;min-height:48px}
+#tsList .row button.now{background:#fff3b0}
 #oldMsg{position:fixed;inset:0;z-index:60;background:#fff;display:none;align-items:center;justify-content:center;padding:20px;text-align:center;font-size:22px;font-weight:700;line-height:2}
 </style>
 <script type="importmap">
@@ -265,10 +284,20 @@ body.present #row{justify-content:center}
   <h2 class="ctitle">みんなで ピタゴラ５</h2>
   <p class="cmsg" id="clsMsg">つないでいるよ…</p>
   <div id="clsPick" style="display:none">
-    <p class="cmsg">じぶんの ばんごうを おしてね</p>
-    <div class="cnum" id="clsNums"></div>
-    <p class="cmsg">または なまえを いれてね</p>
-    <div class="cname"><input id="clsName" maxlength="10" placeholder="なまえ" autocomplete="off"><button class="cbig" id="clsNameGo">はいる</button></div>
+    <div id="clsNumBox" style="display:none">
+      <p class="cmsg">じぶんの ばんごうを おしてね</p>
+      <div class="cnum" id="clsNums"></div>
+    </div>
+    <div id="clsNameBox">
+      <p class="cmsg">なまえを いれてね</p>
+      <div class="cname"><input id="clsName" maxlength="10" placeholder="なまえ" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="none"><button class="cbig" id="clsNameGo">はいる</button></div>
+      <div id="clsKbBox">
+        <div id="kbTabs"><button data-m="hira">ひらがな</button><button data-m="kata">カタカナ</button><button data-m="abc">ABC・すうじ</button><button id="kbToggle">⌨ がめんの キーボードを かくす</button></div>
+        <div id="kbKeys"></div>
+        <div id="kbEx"></div>
+      </div>
+      <p id="kbHint">そとづけの キーボードを つかうときは、「なまえ」の ところを おしてから うってね</p>
+    </div>
   </div>
   <p style="text-align:center;margin-top:16px"><button class="cbig" id="clsRetry" style="display:none;background:#e8590c">もういちど つなぐ</button></p>
 </div></div>
@@ -285,7 +314,10 @@ body.present #row{justify-content:center}
   <div class="sec"><h3>📢 生徒の画面</h3><div class="now" id="tpNow"></div>
     <div class="tb" id="tpLv"></div>
     <div class="tb" style="margin-top:8px"><button id="tpOpen" class="open">🔓 メニューを ひらく（すきに えらべる）</button></div></div>
-  <div class="sec"><div class="cnt">ばんごうの 数 <button id="tpMinus">−</button><span id="tpCount">16</span><button id="tpPlus">＋</button></div></div>
+  <div class="sec"><h3>🚪 生徒の 入りかた</h3>
+    <div class="tb"><button id="tpEntName">✏️ なまえを うって 入る</button><button id="tpEntNum">🔢 ばんごうを おして 入る</button></div>
+    <div style="font-size:13px;color:#666;margin-top:6px">すでに 入っている 生徒は そのままです。つぎに 入る 生徒から かわります</div></div>
+  <div class="sec"><div class="cnt">ばんごうの 数（ばんごうで 入るとき） <button id="tpMinus">−</button><span id="tpCount">16</span><button id="tpPlus">＋</button></div></div>
   <div class="sec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
       <h3 style="margin:0">📊 みんなの 進みぐあい</h3>
       <div style="display:flex;gap:8px"><button id="tpPresent" style="background:#f08c00;color:#fff;font-size:15px;padding:0 12px">📽 さくひんを じゅんばんに 見せる</button>
@@ -299,7 +331,8 @@ body.present #row{justify-content:center}
   <button id="qrBigClose">ふつうの表示に もどす</button>
 </div>
 <button id="tpBack">👩‍🏫 せんせいパネルへ</button>
-<div id="tpShow"><button id="tsPrev" aria-label="まえの さくひん">◀</button><span id="tsTxt"></span><button id="tsName">なまえを かくす</button><button id="tsNext" aria-label="つぎの さくひん">▶</button></div>
+<div id="tpShow"><button id="tsPrev" aria-label="まえの さくひん">◀</button><span id="tsTxt"></span><button id="tsPick">📋 えらぶ</button><button id="tsName">なまえを だす</button><button id="tsNext" aria-label="つぎの さくひん">▶</button></div>
+<div id="tsList"><div class="box"><h2>さくひんを えらぶ</h2><div id="tsListBody"></div><button id="tsListClose" style="display:block;margin:8px auto 0;background:#e8eef2;font-size:18px;padding:0 26px;min-height:48px">とじる</button></div></div>
 <div id="oldMsg"><div id="oldMsgTxt"></div></div>
 <script>
 // 古い iPad などで、ゲームが 動きださないときに わけを 出す（ふつうの script なので、古い ブラウザでも 動く）
@@ -1270,7 +1303,7 @@ $('startBtn').addEventListener('click',()=>{ audioOn(); $('help').classList.remo
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('touchmove',e=>{ if(!e.target.closest('input[type=range],.box,#palette,.mwrap,.cls')) e.preventDefault(); },{passive:false});
 let lastTouch=0;
-document.addEventListener('touchend',e=>{ const n=Date.now(); if(n-lastTouch<300&&!e.target.closest('input[type=range]')) e.preventDefault(); lastTouch=n; },{passive:false});
+document.addEventListener('touchend',e=>{ const n=Date.now(); if(n-lastTouch<300&&!e.target.closest('input[type=range],#clsKbBox,#tsList')) e.preventDefault(); lastTouch=n; },{passive:false});
 
 // ---------- テスト用フック ----------
 // 動く物体は cannon-es の body.position で動かし、メッシュは毎フレームそこから写しています（まきもどし中は rec[] の記録から写します）
@@ -1318,6 +1351,46 @@ function join(id,label){ audioOn(); C.me={id,label}; $('clsIn').classList.remove
   send('join'); C.applied=0; if(C.cfg) applyCfg(C.cfg); }
 $('clsNameGo').onclick=()=>{ const v=$('clsName').value.trim().replace(/\s+/g,'').slice(0,10); if(!v){ $('clsName').focus(); return; } join('m'+v,v); };
 $('clsName').addEventListener('keydown',e=>{ if(e.key==='Enter') $('clsNameGo').click(); });
+// ---- 名前用の がめんキーボード（そとづけキーボードも そのまま つかえる） ----
+const KB_HIRA=[['あ','い','う','え','お'],['か','き','く','け','こ'],['さ','し','す','せ','そ'],['た','ち','つ','て','と'],['な','に','ぬ','ね','の'],['は','ひ','ふ','へ','ほ'],['ま','み','む','め','も'],['や','','ゆ','','よ'],['ら','り','る','れ','ろ'],['わ','','','','を']];
+const toKata=t=>t.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)), toHira=t=>t.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
+const DK='かがきぎくぐけげこごさざしじすずせぜそぞただちぢつづてでとどはばひびふぶへべほぼうゔ', HN='はぱひぴふぷへぺほぽ', SM='あぁいぃうぅえぇおぉつっやゃゆゅよょわゎ';
+const dakOf={}, hanOf={}, baseOf={}, smOf={}, bigOf={};
+for(let i=0;i<DK.length;i+=2){ dakOf[DK[i]]=DK[i+1]; baseOf[DK[i+1]]=DK[i]; }
+for(let i=0;i<HN.length;i+=2){ hanOf[HN[i]]=HN[i+1]; baseOf[HN[i+1]]=HN[i]; }
+for(let i=0;i<SM.length;i+=2){ smOf[SM[i]]=SM[i+1]; bigOf[SM[i+1]]=SM[i]; }
+let kbMode='hira', kbLow=false, kbOn=true;
+function kbIns(t){ const el=$('clsName'); let a=el.selectionStart, b=el.selectionEnd; if(a==null){ a=b=el.value.length; }
+  const nv=el.value.slice(0,a)+t+el.value.slice(b); if(nv.length>10) return; el.value=nv; try{ el.setSelectionRange(a+t.length,a+t.length); }catch(e){} }
+function kbBack(){ const el=$('clsName'); let a=el.selectionStart, b=el.selectionEnd; if(a==null){ a=b=el.value.length; }
+  if(a===b){ if(a<=0) return; a--; } el.value=el.value.slice(0,a)+el.value.slice(b); try{ el.setSelectionRange(a,a); }catch(e){} }
+// 1つ前の 字を ゛ ゜ 小 に かえる（もういちど おすと もとに もどる）
+function kbChange(kind){ const el=$('clsName'), p=el.selectionStart==null?el.value.length:el.selectionStart; if(p<=0) return;
+  const ch=el.value[p-1], isK=/[ァ-ヶ]/.test(ch), h=toHira(ch), base=baseOf[h]||bigOf[h]||h; let nx;
+  if(kind==='d'){ const t=dakOf[base]; if(!t) return; nx=(h===t)?base:t; }
+  else if(kind==='p'){ const t=hanOf[base]; if(!t) return; nx=(h===t)?base:t; }
+  else { const t=smOf[base]; if(!t) return; nx=(h===t)?base:t; }
+  if(isK) nx=toKata(nx); el.value=el.value.slice(0,p-1)+nx+el.value.slice(p); try{ el.setSelectionRange(p,p); }catch(e){} }
+function kbDraw(){
+  document.querySelectorAll('#kbTabs button[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===kbMode));
+  let keys=[];
+  if(kbMode==='abc'){ const L=kbLow?'abcdefghijklmnopqrstuvwxyz':'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; keys=(L+'0123456789').split(''); while(keys.length%5) keys.push(''); }
+  else keys=KB_HIRA.flat().map(c=>c&&kbMode==='kata'?toKata(c):c);
+  const k=$('kbKeys'); k.innerHTML='';
+  keys.forEach(c=>{ const b=document.createElement('button'); b.className='kbk'+(c?'':' sp'); b.textContent=c||'・'; if(c) b.onclick=()=>kbIns(c); else b.disabled=true; k.appendChild(b); });
+  const ex=$('kbEx'); ex.innerHTML='';
+  const add=(t,fn,cls)=>{ const b=document.createElement('button'); b.className='kbk'+(cls?' '+cls:''); b.textContent=t; b.onclick=fn; ex.appendChild(b); };
+  if(kbMode==='abc'){ add(kbLow?'A':'a',()=>{ kbLow=!kbLow; kbDraw(); }); }
+  else { add(kbMode==='kata'?'ン':'ん',()=>kbIns(kbMode==='kata'?'ン':'ん')); add('ー',()=>kbIns('ー')); add('゛',()=>kbChange('d')); add('゜',()=>kbChange('p')); add('小',()=>kbChange('s')); }
+  add('⌫ けす',kbBack,'del'); }
+function kbApply(){ $('clsKbBox').style.display=kbOn?'':'none'; $('clsName').setAttribute('inputmode',kbOn?'none':'text');   // がめんキーボードの ときは、iPad 本体の キーボードを 出さない（そとづけは つかえる）
+  $('kbHint').style.display=kbOn?'':'none'; $('kbShow').style.display=kbOn?'none':''; }
+(function(){ const wrap=document.createElement('div'); wrap.style.cssText='text-align:center;margin-top:8px';
+  const sb=document.createElement('button'); sb.id='kbShow'; sb.className='cbig'; sb.style.cssText='background:#1c7ed6;font-size:18px;min-height:48px;display:none'; sb.textContent='⌨ がめんの キーボードを だす';
+  sb.onclick=()=>{ kbOn=true; kbApply(); }; wrap.appendChild(sb); $('clsKbBox').parentNode.insertBefore(wrap,$('kbHint'));
+  document.querySelectorAll('#kbTabs button[data-m]').forEach(b=>b.onclick=()=>{ kbMode=b.dataset.m; kbDraw(); });
+  $('kbToggle').onclick=()=>{ kbOn=false; kbApply(); $('clsName').focus(); };
+  kbDraw(); kbApply(); })();
 $('clsRetry').onclick=retryNow; $('clsNetBtn').onclick=retryNow;
 // できごとを 送る（play は 新しい ものだけ のこす。win は 作品つきなので かならず 送る）
 function send(status){ if(!C.me) return; const lv=document.body.classList.contains('inmenu')?-1:state.level;
@@ -1331,7 +1404,8 @@ function goLevel(l,payload){ closeMenu(); $('intro').classList.remove('open'); s
   if(payload&&(l===7||l===8)){ setLevel(l,true); const r=payload.kind==='B'?{kind:'B',b:payload.b,layout:clone(RANDOM_SETS[payload.b%RANDOM_SETS.length])}:Object.assign({},payload,{shared:true});
     applyRandom(r); }
   else setLevel(l); }
-function applyCfg(cfg){ C.cfg=cfg; renderNums();
+function showEntry(){ const num=!!(C.cfg&&C.cfg.entry==='num'); $('clsNumBox').style.display=num?'':'none'; $('clsNameBox').style.display=num?'none':''; }
+function applyCfg(cfg){ C.cfg=cfg; renderNums(); showEntry();
   if(!C.me){ $('clsMsg').textContent=''; $('clsPick').style.display=''; $('clsRetry').style.display='none'; return; }
   if(cfg.mode==='lock'&&cfg.level>=0){ C.locked=true; document.body.classList.add('locked');
     if(cfg.ts!==C.applied){ C.applied=cfg.ts; goLevel(cfg.level,cfg.payload); toast('せんせいが 「'+LV_NAME(cfg.level)+'」を ひらいたよ'); } }
@@ -1365,6 +1439,7 @@ function tpRender(){ if(!tpData) return; const cfg=tpData.cfg;
   $('tpNow').textContent=cfg.mode==='lock'&&cfg.level>=0?'いま：みんなの 画面を「'+LV_NAME(cfg.level)+'」に そろえています（メニューに もどれません）':'いま：メニューが ひらいています（すきに えらべます）';
   document.querySelectorAll('#tpLv button').forEach(b=>b.classList.toggle('on',cfg.mode==='lock'&&+b.dataset.l===cfg.level));
   $('tpCount').textContent=cfg.count||16;
+  $('tpEntName').classList.toggle('on',cfg.entry!=='num'); $('tpEntNum').classList.toggle('on',cfg.entry==='num');
   const st=tpData.students, now=tpData.now, ids=tpIds();
   $('tpMon').innerHTML=ids.length?'':'<div style="font-size:15px;color:#666">まだ だれも 入っていません</div>';
   let here=0;
@@ -1374,7 +1449,7 @@ function tpRender(){ if(!tpData) return; const cfg=tpData.cfg;
     const stars=(s.clears||[]).map(l=>'⭐'+LV_NAME(l).replace('レベル','L')).join(' ');
     d.innerHTML='<b>'+esc(s.name)+'</b><div>'+(s.lv>=0?(win?'🎉 ':'✏️ ')+LV_NAME(s.lv)+(win?' クリア！':' ちょうせん中'):'メニュー')+(s.tries?' <small>（'+s.tries+'かい ためした）</small>':'')+'</div><div style="font-size:12px;color:#555">'+stars+'</div>';
     const addBtn=(lv,kind,txt)=>{ const b=document.createElement('button'); b.textContent=txt; if(kind==='t') b.style.background='#868e96';
-      b.onclick=()=>{ const list=tpEntries(), i=list.findIndex(e=>e.id===id&&e.kind===kind); tpShow(list,Math.max(0,i)); }; d.appendChild(b); };
+      b.onclick=()=>{ const list=tpEntries(), i=list.findIndex(e=>e.id===id&&e.kind===kind); tpStart(list,Math.max(0,i)); }; d.appendChild(b); };
     if(s.lastWork!==undefined) addBtn(s.lastWork,'w','👀 '+LV_NAME(s.lastWork)+' クリアした さくひん');
     if(s.lastTry!==undefined) addBtn(s.lastTry,'t','👀 '+LV_NAME(s.lastTry)+' ためした さくひん');
     $('tpMon').appendChild(d); });
@@ -1401,7 +1476,7 @@ async function tpShow(list,idx){ if(!list.length){ toast('まだ 見せられる
   tpGame(); const lv=e.lv; state.introSeen[lv]=true; closeMenu(); $('help').classList.remove('open'); state.paused=false;
   if(lv===0){ setLevel(0); (w.choice||[]).forEach((c,g)=>state.choice[g]=c); toEdit(); }
   else { const lay=unpackWork(w); setLevel(lv,true); const L=BL(); if(L.rnd){ L.orig=clone(lay); L.answer=null; } layouts[lv-1]=clone(lay); state.sel=-1; toEdit(); }
-  C.showing=true; tsText(); $('tpShow').style.display='flex'; document.body.classList.add('present'); resize(); }
+  C.showing=true; if(C.hideName===undefined) C.hideName=true; tsText(); $('tpShow').style.display='flex'; document.body.classList.add('present'); resize(); }
 function tsText(){ const list=C.showList, e=list[C.showIdx], tag='（'+LV_NAME(e.lv)+(e.kind==='w'?'・クリア':'・ちょうせん中')+'）';
   $('tsTxt').textContent=(C.hideName?'さくひん '+(C.showIdx+1)+' / '+list.length:'👑 '+e.name+' さんの さくひん')+tag;
   $('tsName').textContent=C.hideName?'なまえを だす':'なまえを かくす'; }
@@ -1409,11 +1484,19 @@ function endShow(){ C.showing=false; $('tpShow').style.display='none'; document.
 $('tsPrev').onclick=()=>{ audioOn(); tpShow(C.showList,C.showIdx-1); };
 $('tsNext').onclick=()=>{ audioOn(); tpShow(C.showList,C.showIdx+1); };
 $('tsName').onclick=()=>{ C.hideName=!C.hideName; tsText(); };
-$('tpPresent').onclick=()=>{ audioOn(); tpShow(tpEntries(),0); };
+$('tpPresent').onclick=()=>{ audioOn(); tpStart(tpEntries(),0); };
+function tpStart(list,i){ C.hideName=true; tpShow(list,i); }   // 発表を はじめるときは、いつも 生徒の なまえを 出さない
+$('tsPick').onclick=()=>{ audioOn(); const body=$('tsListBody'); body.innerHTML='';
+  (C.showList||[]).forEach((e,i)=>{ const r=document.createElement('div'); r.className='row'; const b=document.createElement('button'); if(i===C.showIdx) b.className='now';
+    b.textContent=(i+1)+'　'+e.name+'（'+LV_NAME(e.lv)+(e.kind==='w'?'・クリア':'・ちょうせん中')+'）'; b.onclick=()=>{ $('tsList').classList.remove('open'); tpShow(C.showList,i); }; r.appendChild(b); body.appendChild(r); });
+  $('tsList').classList.add('open'); };
+$('tsListClose').onclick=()=>$('tsList').classList.remove('open');
 function tpGame(){ $('tp').classList.remove('open'); $('tpBack').style.display='block'; $('help').classList.remove('open'); state.paused=false; }
 $('tpGame').onclick=()=>{ tpGame(); const was=C.showing; endShow();
   const cf=tpData&&tpData.cfg; if(was&&cf&&cf.mode==='lock'&&cf.level>=0) goLevel(cf.level,cf.payload); };   // 作品を 見たあとは 生徒と おなじ 画面に もどす
 $('tpBack').onclick=()=>{ $('tp').classList.add('open'); $('tpBack').style.display='none'; tpPoll(); };
+$('tpEntName').onclick=()=>tpSet({entry:'name'});
+$('tpEntNum').onclick=()=>tpSet({entry:'num'});
 $('tpOpen').onclick=()=>tpSet({mode:'menu',level:-1,payload:null});
 $('tpMinus').onclick=()=>tpSet({count:Math.max(1,(+$('tpCount').textContent)-1)});
 $('tpPlus').onclick=()=>tpSet({count:Math.min(40,(+$('tpCount').textContent)+1)});
