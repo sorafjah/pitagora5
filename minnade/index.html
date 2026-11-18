@@ -607,25 +607,28 @@ function createBuildSim(C, layout, eps){
 const P=(type,x,y,rot,opt,lock)=>({type,x,y,rot:rot||0,opt:opt||0,lock:!!lock});
 // intro＝そのレベルで はじめて 出てくるパーツと、その説明（レベルに入ったときに表示）
 const BUILD_LEVELS = [
-  { tab:'2', mission:'いたを おいて、<ruby>玉<rt>たま</rt></ruby>を ゴールまで ころがそう', allow:['plankL','plankS','chime'],
-    intro:[ ['plankL','ながい いた・みじかい いた','<ruby>玉<rt>たま</rt></ruby>の とおりみちに なる。↺ ↻ で かたむけよう'],
-            ['chime','てっきん','<ruby>玉<rt>たま</rt></ruby>が あたると <ruby>音<rt>おと</rt></ruby>が なる。いたの かわりにも なるよ'] ],
+  { tab:'2', mission:'いたを おいて、<ruby>玉<rt>たま</rt></ruby>を ゴールまで ころがそう', allow:['plankL','plankS'],
+    intro:[ ['plankL','ながい いた・みじかい いた','<ruby>玉<rt>たま</rt></ruby>の とおりみちに なる。↺ ↻ で かたむけよう'] ],
+    // 正解の例：ながい いた (8,10) -1 を 1本。ほかにも いろいろな おきかたで ゴールできる（2026-11-19 あたらしく 追加）
+    parts:[ P('plankS',4,14.5,-1,0,1), P('ball',3.3,15.5,0,0,1), P('goal',18,0.5,0,0,1) ] },
+  { tab:'3', mission:'いたを おいて、<ruby>玉<rt>たま</rt></ruby>を ゴールまで ころがそう', allow:['plankL','plankS','chime'],
+    intro:[ ['chime','てっきん','<ruby>玉<rt>たま</rt></ruby>が あたると <ruby>音<rt>おと</rt></ruby>が なる。いたの かわりにも なるよ'] ],
     parts:[ P('plankS',3.5,14.5,-1,0,1), P('ball',3,15.5,0,0,1), P('goal',24,0.5,0,0,1) ] },
-  { tab:'3', mission:'じぶんの <ruby>玉<rt>たま</rt></ruby>で <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を おして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','domino','plankL','plankS'],
+  { tab:'4', mission:'じぶんの <ruby>玉<rt>たま</rt></ruby>で <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を おして、<ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','domino','plankL','plankS'],
     hint:[[2.5,16]],
     intro:[ ['ball','たま','<ruby>玉<rt>たま</rt></ruby>を じぶんで おける。さかの <ruby>上<rt>うえ</rt></ruby>に おいてみよう'],
             ['domino','ドミノ','たおれると となりも たおれる。<ruby>玉<rt>たま</rt></ruby>の かわりに おしたり、<ruby>音<rt>おと</rt></ruby>を たのしんだり できるよ'] ],
     // ゴール（opt 1）は 赤い玉が 入ったときだけ せいこう。正解の例：たま (2.5,16) ＋ ながい いた (8.5,11) -1 ・(14.5,10) 0 ＋ ながい いた (21.5,4) +1（赤い たまの いたを 1 ひくくした：2026-11-18）
     parts:[ P('ball',19,9.7,0,0,1), P('plankL',4.5,14,-2,0,1), P('plankS',20,9,0,0,1), P('goal',16,0.5,0,1,1) ] },
-  { tab:'4', mission:'ベルトコンベアで <ruby>玉<rt>たま</rt></ruby>を たなの <ruby>上<rt>うえ</rt></ruby>まで はこんで、ゴールへ とどけよう', allow:['belt','plankL','plankS'],
+  { tab:'5', mission:'ベルトコンベアで <ruby>玉<rt>たま</rt></ruby>を たなの <ruby>上<rt>うえ</rt></ruby>まで はこんで、ゴールへ とどけよう', allow:['belt','plankL','plankS'],
     intro:[ ['belt','ベルトコンベア','のった <ruby>玉<rt>たま</rt></ruby>を はこぶ。のぼり<ruby>坂<rt>ざか</rt></ruby>でも はこべるよ。ボタンで <ruby>向<rt>む</rt></ruby>きと はやさを かえる'] ],
     // 正解の例：ベルト (7,4) かたむき+3 みぎ・はやい（棚まで 上げる）／ ベルト (13,1) かたむき+3（床から とばす）。棚(板)を (13,6.5) に 右上へ ずらして、ベルト1つでは とどきにくく した（2026-11-18）
     parts:[ P('ball',2.5,4,0,0,1), P('plankS',3.5,3.2,-1,0,1), P('plankL',13,6.5,0,0,1), P('goal',16.5,0.5,0,0,1) ] },
-  { tab:'5', mission:'シーソーで <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばして、ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','seesaw','plankL','plankS'],
+  { tab:'6', mission:'シーソーで <ruby>赤<rt>あか</rt></ruby>い <ruby>玉<rt>たま</rt></ruby>を とばして、ゴールに <ruby>入<rt>い</rt></ruby>れよう', allow:['ball','seesaw','plankL','plankS'],
     intro:[ ['seesaw','シーソー','かたほうに <ruby>玉<rt>たま</rt></ruby>が おちると、はんたいがわの <ruby>玉<rt>たま</rt></ruby>が とぶ。<ruby>高<rt>たか</rt></ruby>い ところから おとすほど、よく とぶよ'] ],
     // 正解の例：たま (10,12) ＋ ながい いた (18,3) 0（とんだ 赤い玉を うけて ゴールへ）
     parts:[ P('ball',6.1,3,0,0,1), P('seesaw',8,2,2,0,1), P('goal',23.5,0.5,0,1,1) ] },
-  { tab:'6', mission:'ばねや トランポリンで、<ruby>高<rt>たか</rt></ruby>い ゴールに とどけよう', allow:['plankL','plankS','spring','tramp'],
+  { tab:'7', mission:'ばねや トランポリンで、<ruby>高<rt>たか</rt></ruby>い ゴールに とどけよう', allow:['plankL','plankS','spring','tramp'],
     intro:[ ['spring','ばね','のった <ruby>玉<rt>たま</rt></ruby>を はじきとばす。↺ ↻ で とぶ <ruby>向<rt>む</rt></ruby>き、ボタンで つよさを かえる'],
             ['tramp','トランポリン','<ruby>落<rt>お</rt></ruby>ちてきた <ruby>玉<rt>たま</rt></ruby>が はねかえる'] ],
     parts:[ P('plankS',3.5,5.5,-1,0,1), P('ball',3,6.5,0,0,1), P('plankS',15,6.5,0,0,1), P('goal',15,7,0,0,1) ] },
@@ -1327,7 +1330,7 @@ window.__game={ state, camera, cam, CFG, PARTS, BOARD, BUILD_LEVELS, SAMPLE, lay
 // 失敗したら 自動で つなぎ直す（間かくを のばす）。2回つづけて 失敗したら「もういちど つなぐ」を 出す
 const GAS=(typeof google!=='undefined'&&google.script&&google.script.run)?google.script:null;
 const CLS={ POLL:3000, POLL_SLOW:7000, TIMEOUT:15000 };
-const LV_NAME=l=>l<0?'メニュー':l===0?'レベル1':l<=5?'レベル'+(l+1):['じゆう','できたて','みほん'][l-6]||'?';
+const LV_NAME=l=>l<0?'メニュー':l===0?'レベル1':l<=6?'レベル'+(l+1):['じゆう','できたて','みほん'][l-7]||'?';
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function gcall(fn,...args){ return new Promise((res,rej)=>{ let done=false; const to=setTimeout(()=>{ if(!done){ done=true; rej(new Error('timeout')); } },CLS.TIMEOUT);
   GAS.run.withSuccessHandler(v=>{ if(done) return; done=true; clearTimeout(to); res(v); }).withFailureHandler(e=>{ if(done) return; done=true; clearTimeout(to); rej(e); })[fn](...args); }); }
@@ -1401,7 +1404,7 @@ function send(status){ if(!C.me) return; const lv=document.body.classList.contai
 function packWork(lay){ return {c:lay.map(p=>[p.type,p.x,p.y,p.rot||0,p.opt||0,p.lock?1:0])}; }
 function unpackWork(w){ if(w&&w.c) return w.c.map(a=>P(a[0],a[1],a[2],a[3],a[4],!!a[5])); return Array.isArray(w)?w:[]; }
 function goLevel(l,payload){ closeMenu(); $('intro').classList.remove('open'); state.paused=$('help').classList.contains('open');
-  if(payload&&(l===7||l===8)){ setLevel(l,true); const r=payload.kind==='B'?{kind:'B',b:payload.b,layout:clone(RANDOM_SETS[payload.b%RANDOM_SETS.length])}:Object.assign({},payload,{shared:true});
+  if(payload&&(l===8||l===9)){ setLevel(l,true); const r=payload.kind==='B'?{kind:'B',b:payload.b,layout:clone(RANDOM_SETS[payload.b%RANDOM_SETS.length])}:Object.assign({},payload,{shared:true});
     applyRandom(r); }
   else setLevel(l); }
 function showEntry(){ const num=!!(C.cfg&&C.cfg.entry==='num'); $('clsNumBox').style.display=num?'':'none'; $('clsNameBox').style.display=num?'none':''; }
@@ -1419,18 +1422,18 @@ HOOK.finish=st=>{ if(C.teacher&&C.showing){ const bb=$('bannerBtn'); bb.innerHTM
     if(C.locked){ const bb=$('bannerBtn'); bb.innerHTML='べつの やりかたも ためす'; bb.onclick=toEdit; $('bannerBtn2').style.display='none'; } } };
 
 // ---- 先生 ----
-const TP_LV=[0,1,2,3,4,5,6,7,8];
+const TP_LV=[0,1,2,3,4,5,6,7,8,9];
 let tpData=null, tpResetT=0;
 function tpBuild(){ const el=$('tpLv'); el.innerHTML='';
   TP_LV.forEach(l=>{ const b=document.createElement('button'); b.dataset.l=l;
-    b.innerHTML=(l===7?'🎲 できたて（みんな おなじ おだい）':l===8?'📦 みほん（みんな おなじ）':l===6?'🧩 じゆう':LV_NAME(l))+'に そろえる';
+    b.innerHTML=(l===8?'🎲 できたて（みんな おなじ おだい）':l===9?'📦 みほん（みんな おなじ）':l===7?'🧩 じゆう':LV_NAME(l))+'に そろえる';
     b.onclick=()=>tpLock(l); el.appendChild(b); }); }
 async function tpLock(l){ let payload=null;
-  if(l===7){ $('tpNow').textContent='おだいを つくっているよ…'; await new Promise(r=>setTimeout(r,50));
+  if(l===8){ $('tpNow').textContent='おだいを つくっているよ…'; await new Promise(r=>setTimeout(r,50));
     let full=genRandom(CANNON,(Math.random()*4294967296)>>>0,()=>performance.now()).layout||clone(RANDOM_SETS[Math.floor(Math.random()*RANDOM_SETS.length)]);
     let pz=makePuzzle(CANNON,full,Math.random); if(!pz){ full=clone(RANDOM_SETS[0]); pz=makePuzzle(CANNON,full,Math.random); }
     payload={kind:'A',layout:pz.puzzle,puzzle:pz.puzzle,answer:pz.answer,tries:1,ms:0}; }
-  if(l===8) payload={kind:'B',b:Math.floor(Math.random()*RANDOM_SETS.length)};
+  if(l===9) payload={kind:'B',b:Math.floor(Math.random()*RANDOM_SETS.length)};
   tpSet({mode:'lock',level:l,payload}); }
 async function tpSet(c){ try{ const r=JSON.parse(await gcall('setCfg',c)); if(tpData) tpData.cfg=r;
     if(c.mode==='lock'&&c.level>=0){ endShow(); goLevel(c.level,c.payload); }   // 先生の ゲーム画面も 生徒と おなじに
