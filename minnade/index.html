@@ -1476,7 +1476,8 @@ async function tpShow(list,idx){ if(!list.length){ toast('まだ 見せられる
   tpGame(); const lv=e.lv; state.introSeen[lv]=true; closeMenu(); $('help').classList.remove('open'); state.paused=false;
   if(lv===0){ setLevel(0); (w.choice||[]).forEach((c,g)=>state.choice[g]=c); toEdit(); }
   else { const lay=unpackWork(w); setLevel(lv,true); const L=BL(); if(L.rnd){ L.orig=clone(lay); L.answer=null; } layouts[lv-1]=clone(lay); state.sel=-1; toEdit(); }
-  C.showing=true; if(C.hideName===undefined) C.hideName=true; tsText(); $('tpShow').style.display='flex'; document.body.classList.add('present'); resize(); }
+  if(!C.showing) C.hideName=true; C.showing=true;   // 発表を はじめるときは、どこから でも なまえを 出さない
+  tsText(); $('tpShow').style.display='flex'; document.body.classList.add('present'); resize(); }
 function tsText(){ const list=C.showList, e=list[C.showIdx], tag='（'+LV_NAME(e.lv)+(e.kind==='w'?'・クリア':'・ちょうせん中')+'）';
   $('tsTxt').textContent=(C.hideName?'さくひん '+(C.showIdx+1)+' / '+list.length:'👑 '+e.name+' さんの さくひん')+tag;
   $('tsName').textContent=C.hideName?'なまえを だす':'なまえを かくす'; }
